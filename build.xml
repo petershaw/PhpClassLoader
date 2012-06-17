@@ -153,6 +153,24 @@
                 <include name="*" />
             </fileset>
         </tar>
+        
+        <echo msg="Creating phar archive..." />
+        <pharpackage destfile="${project.targetdir}/${project.name}.phar.gz" basedir="./" compression="gzip">
+            <fileset dir="${project.builddir}/">
+                <include name="**/**" />
+            </fileset>
+            <metadata>
+                <element name="version" value="1.0" />
+                <element name="authors">
+                    <element name="Peter Shaw">
+                        <element name="e-mail" value="unthoughted@googlemail.com" />
+                        <element name="twitter" value="@peter_shaw" />
+                    </element>
+                </element>
+                <element name="website" value="https://github.com/petershaw/PhpClassLoader" />
+            </metadata>
+        </pharpackage>
+
 	<delete dir="${application.startdir}/${project.builddir}" includeemptydirs="true" verbose="true" failonerror="true" />
         <echo msg="Files copied and compressed in build directory OK!" />
     </target>	
