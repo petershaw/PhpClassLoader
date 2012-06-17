@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<setup>
+		<define variable="schema" type="file"
+			value="configuaration.xsd" />
+	</setup>
+	<!-- 
+	<psb enable="true">
+		<access name="configuration" class="" method="">
+			<parameters>
+				<param name="file" type="String" required="true"/>
+			</parameters>
+			<returns>
+				<param name="loaded" type="Boolean" />
+			</returns>
+			<restrictions>
+				<restrict type="host" value="127.0.0.1" />
+				<restrict type="valid-user">
+					<provider class="Access::VaildUser">
+						<param name="hasgroup" type="String">www</param>
+					</provider>
+				</restrict>
+			</restrictions>
+		</access>
+	</psb>
+	 -->
+	<log>
+		<logger handle="Logger::default" mode="debug" />
+	</log>
+</configuration>

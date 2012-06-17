@@ -1,0 +1,143 @@
+<?xml version="1.0"  encoding="UTF-8" ?>
+
+<project name="PhpClassLoader" basedir="." default="main">
+    <property file="build.properties" />
+    
+    <!-- Classpath -->
+    <echo msg="Setting Classpath..." />
+    <path id="project.class.path">
+        <pathelement dir="php-inc" />
+    </path>
+    <includepath classpathref="project.class.path" />
+
+    <!-- Fileset for all files -->
+    <fileset dir="." id="allfiles">
+        <include name="**" />
+    </fileset>
+
+    <!-- Fileset for all sources -->
+    <fileset dir="${application.startdir}" id="deploysources">
+        <include name="${project.incdir}/**/*.php" />
+        <include name="${project.incdir}/**/*.xml" />
+        <include name="${project.incdir}/**/*.xslt" />
+	
+        <include name="${project.docsdir}/**" />
+
+	<!-- do not deploy temporary or legancy code -->
+	<exclude name="**/_**/*.php"/>
+    </fileset>
+    
+    <!-- ============================================  -->
+    <!-- (DEFAULT) Target: Main                        -->
+    <!-- ============================================  -->
+    <target name="main" description="main target">
+        <echo msg="Target MAIN..." />
+        <phingcall target="clean" />
+        <phingcall target="prepare" />
+    	<phingcall target="build" />
+        <phingcall target="docs" />
+        <phingcall target="dist" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: Clean                                 -->
+    <!-- ============================================  -->
+    <target name="clean" description="clean target">
+        <echo msg="Target CLEAN..." />
+        <delete dir="${application.startdir}/${project.targetdir}" includeemptydirs="true" verbose="true" failonerror="true" />
+        <delete dir="${application.startdir}/${project.builddir}" includeemptydirs="true" verbose="true" failonerror="true" />
+        <delete dir="${application.startdir}/${project.reportdir}" includeemptydirs="true" verbose="true" failonerror="true" />
+        <delete dir="${application.startdir}/${project.docsdir}" includeemptydirs="true" verbose="true" failonerror="true" />
+    </target>
+	
+    <!-- ============================================  -->
+    <!-- Target: Prepare                               -->
+    <!-- ============================================  -->
+    <target name="prepare">
+        <echo msg="Target PREPARE..." />
+        
+        <echo msg="Making build directory." />
+        <mkdir dir="${project.builddir}" />
+		
+        <echo msg="Making target directory." />
+        <mkdir dir="${project.targetdir}" />
+        
+        <echo msg="Making report directory." />
+        <mkdir dir="${project.reportdir}" />
+        
+        <echo msg="Making docs directory." />
+        <mkdir dir="${project.docsdir}" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: Test                                  --> 
+    <!-- ============================================  -->
+    <target name="test">
+        <echo msg="Target TEST..." />
+        <coverage-setup database="${application.startdir}/${project.reportdir}/coverage.db">
+            <fileset dir="${project.incdir}">
+                <include name="**/*.php"/>
+                <!-- do not cover temporary or legancy code -->
+                <exclude name="**/_**/*.php"/>
+            </fileset>
+        </coverage-setup>
+        <phpunit codecoverage="true" haltonfailure="false" haltonerror="false" printsummary="true">
+            <formatter todir="${application.startdir}/${project.reportdir}" type="xml"/>
+            <batchtest>
+                <fileset dir="${project.testdir}">
+                    <include name="PCLTestsSuite.php"/>
+                </fileset>
+            </batchtest>
+        </phpunit>
+    </target>
+    
+    <!-- ============================================  -->
+    <!-- Target: Build                        -->
+    <!-- ============================================  -->
+    <target name="build" description="build target" depends="test">
+        <echo msg="Target BUILD..." />
+        <copy todir="./build">
+            <fileset refid="deploysources" />
+        </copy>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: Rebuild                               -->
+    <!-- ============================================  -->
+    <target name="rebuild" description="rebuilds this package">
+        <echo msg="Target REBUILD..." />
+        <delete dir="${project.builddir}" />
+        <phingcall target="build" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: Docs                                  --> 
+    <!-- ============================================  -->
+    <target name="docs">
+        <echo msg="Target DOCS..." />
+        <phpdoc title="${project.name} API Documentation" destdir="${project.docsdir}" output="HTML:frames:earthli">
+            <fileset dir="${project.incdir}">
+                <include name="**/*.php"/>
+                <!-- do not cover temporary or legancy code -->
+                <exclude name="**/_**/*.php"/>
+            </fileset>
+        </phpdoc>
+       <!-- -->
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: Dist                                  --> 
+    <!-- ============================================  -->
+    <target name="dist">
+        <echo msg="Target DIST..." />
+        <echo msg="Creating archive..." />
+        <tar destfile="${project.targetdir}/${project.name}.tar.gz" compression="gzip">
+            <fileset dir="${project.builddir}/">
+                <include name="*" />
+            </fileset>
+        </tar>
+	<delete dir="${application.startdir}/${project.builddir}" includeemptydirs="true" verbose="true" failonerror="true" />
+        <echo msg="Files copied and compressed in build directory OK!" />
+    </target>	
+
+</project>

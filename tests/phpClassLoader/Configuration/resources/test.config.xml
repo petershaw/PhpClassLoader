@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<setup>
+		<define variable="u" type="string"
+			value="uuu" />
+		<define variable="testdefine" type="string"
+			value="foo" />
+		<define variable="secondtestdefine" type="string"
+			value="bar" />
+		<define variable="thirdtestdefine" type="string">
+			foo bar test
+		</define>
+	</setup>
+	<!-- 
+	<psb enable="true">
+		<access name="configuration" class="" method="">
+			<parameters>
+				<param name="file" type="String" required="true"/>
+			</parameters>
+			<returns>
+				<param name="loaded" type="Boolean" />
+			</returns>
+			<restrictions>
+				<restrict type="host" value="127.0.0.1" />
+				<restrict type="valid-user">
+					<provider class="Access::VaildUser">
+						<param name="hasgroup" type="String">www</param>
+					</provider>
+				</restrict>
+			</restrictions>
+		</access>
+	</psb>
+	 -->
+	<log>
+		<logger handle="Logger::default" mode="info" />
+	</log>
+</configuration>

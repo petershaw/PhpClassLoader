@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+
+	<!--  Root  -->
+	<xs:element name="configuration">
+		<xs:annotation>
+			<xs:documentation>
+				Configuration of the component.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="setup" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>
+							The setup-section is used as
+							startup-configuration.
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="define" type="eDefine"
+								minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>
+										Define a variable to configurate
+										the component. See component
+										Details for available
+										parameters.
+									</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<!-- 
+				<xs:element name="psb" minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>
+							The PSB-Section is used to provide the
+							component to a servicebus. For more details
+							read the Senzoo-PhpServiceBus documentation.
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="access" type="ePsbAccess"
+								minOccurs="1" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>
+										Descripe how to access the
+										component.
+									</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="enable" use="required"
+							type="xs:boolean">
+							<xs:annotation>
+								<xs:documentation>
+									To enable the psb you have to set
+									this to true, otherwise the
+									servicebus will not work with this
+									component.
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+				 -->
+				<xs:element name="log" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="logger"
+								minOccurs="1" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="handle"
+										type="xs:token" />
+									<xs:attribute name="mode"
+										type="aLogMode" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<!--  Elementtypes  -->
+	<xs:complexType name="eDefine">
+		<xs:sequence></xs:sequence>
+		<xs:attribute name="variable" use="required" type="xs:token">
+			<xs:annotation>
+				<xs:documentation>
+					Every component provides a different set of
+					variables you can -or have to- set via the
+					configurationfile.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="type" use="required">
+			<xs:annotation>
+				<xs:documentation>
+					Select the Type of the definevalue.
+				</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="file" />
+					<xs:enumeration value="env" />
+					<xs:enumeration value="lookup" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string" use="optional" />
+	</xs:complexType>
+
+	<xs:complexType name="ePsbAccess">
+		<xs:annotation>
+			<xs:documentation>
+				The PSB-Access is used to allow a host, a user or a
+				service to use the component via the servicebus. Is no
+				restriction defined, than everyone can use this componet
+				without any limitations. But you can not use a psb
+				without the typeing-section (parameters and returns)
+				because the psb has to deal with the methods in a strict
+				way.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="parameters" minOccurs="1" maxOccurs="1"
+				type="eParams">
+				<xs:annotation>
+					<xs:documentation>
+						You have to specify all input parameters
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="returns" minOccurs="1" maxOccurs="1"
+				type="eParamsSimple">
+				<xs:annotation>
+					<xs:documentation>
+						You have to specify all exspected return values
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="restrictions" minOccurs="0" maxOccurs="1"
+				type="eAccessRestrictions">
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" use="required" type="xs:token">
+			<xs:annotation>
+				<xs:documentation>
+					The nameattribe tells the psb how to access the
+					component.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="class" use="required" type="xs:token">
+			<xs:annotation>
+				<xs:documentation>
+					The class that is used by the name.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="method" use="required" type="xs:token">
+			<xs:annotation>
+				<xs:documentation>
+					The method that should be invoke by the name.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="eAccessRestrictions">
+		<xs:annotation>
+			<xs:documentation>
+				Use the section to limitate the access from teh psb to
+				this component.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="restrict" minOccurs="1"
+				maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="provider" minOccurs="0"
+							maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>
+									The provider is a class that extends
+									the SenzooPsbProvider. It can be
+									used to implement customchecks fot
+									the accesspermission.
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="param"
+										minOccurs="0" maxOccurs="unbounded" type="aParamType" />
+								</xs:sequence>
+								<xs:attribute name="class"
+									use="required" type="xs:token" />
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="type" use="required"
+						type="aRestrictType" />
+					<xs:attribute name="value" use="optional"
+						type="xs:token" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="eParams">
+		<xs:annotation>
+			<xs:documentation>
+				A Parameterset is used to tell a method the excpected
+				Parameters, or return values. A set can have one or more
+				papam-elemnts, each with a set of attributes to describe
+				the parameter. The Name is the name of the parameter.
+				The type is a defind type xou have to choose, because
+				the psb has strict typesetting-check-methods. With
+				required is is possible to define a default value if the
+				parameter is not given by the external call. To use a
+				default, set required to false and define a default as
+				extra attribute.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="param" minOccurs="1"
+				maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence></xs:sequence>
+					<xs:attribute name="name" use="required"
+						type="xs:token" />
+					<xs:attribute name="type" use="required"
+						type="aParamType" />
+					<xs:attribute name="required" use="required"
+						type="xs:boolean" />
+					<xs:attribute name="default" use="optional"
+						type="xs:string" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="eParamsSimple">
+		<xs:annotation>
+			<xs:documentation>
+				A Parameterset is used to tell a method the excpected
+				Parameters, or return values. A set can have one or more
+				papam-elemnts, each with a set of attributes to describe
+				the parameter. The Name is the name of the parameter.
+				The type is a defind type xou have to choose, because
+				the psb has strict typesetting-check-methods. With
+				required is is possible to define a default value if the
+				parameter is not given by the external call. To use a
+				default, set required to false and define a default as
+				extra attribute.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="param" minOccurs="1"
+				maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence></xs:sequence>
+					<xs:attribute name="name" use="required"
+						type="xs:token" />
+					<xs:attribute name="type" use="required"
+						type="aParamType" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!--  Attributetypes  -->
+	<xs:simpleType name="aParamType">
+		<xs:annotation>
+			<xs:documentation>
+				Each parameter needs a type. You can chose one of the
+				list to describe the expected value.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Boolean" />
+			<xs:enumeration value="String" />
+			<xs:enumeration value="Integer" />
+			<xs:enumeration value="Float" />
+			<xs:enumeration value="Double" />
+			<xs:enumeration value="Url" />
+			<xs:enumeration value="Email" />
+
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="aRestrictType">
+		<xs:annotation>
+			<xs:documentation>
+				To describe the access-policy use one of the known
+				restricttypes. Attebntion: Some of those types needs a
+				provider to be declared.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="host" />
+			<xs:enumeration value="valid-user" />
+			<xs:enumeration value="service" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="aLogMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="debug" />
+			<xs:enumeration value="info" />
+			<xs:enumeration value="warn" />
+			<xs:enumeration value="error" />
+			<xs:enumeration value="fatal" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>
