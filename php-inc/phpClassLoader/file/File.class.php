@@ -230,7 +230,11 @@ class File extends FsInfo {
          if (isset($this->fh) == false) {
              $this->open();
          }
-         $originalLength = mb_strlen($string);
+         if(function_exists("mb_strlen")){
+            $originalLength = mb_strlen($string);
+         } else {
+             $originalLength = strlen($string);
+         }
          $byteWritten = fwrite($this->fh, $string);
          if($byteWritten == $originalLength){
              return true;
