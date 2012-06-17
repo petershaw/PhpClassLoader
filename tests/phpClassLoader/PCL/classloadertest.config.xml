@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<parameters>
+		<define variable="mode" type="string"
+			value="flatfile" />
+		<!-- 2 posibilities: absolute path OR 'system_tmp' to use native system tmp-dir -->
+		<define variable="cachefilepath" type="string"
+			value="system_tmp" />
+		<!-- 2 posibilities: relative (from location of classcache.php) OR absolute path -->
+		<define variable="rootdirmode" type="string"
+			value="relative" />	
+		<define variable="rootdirs_list" type="string">
+		/../../../php-inc,/../../../tests
+		</define>	
+		<define variable="excludedirs_list" type="string">
+		/.svn,.svn
+		</define>		
+	</parameters>
+</configuration>

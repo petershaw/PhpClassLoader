@@ -3,7 +3,7 @@
 $equivalentSrcDir = str_replace("tests", "php-inc", dirname(__FILE__));
 require_once $equivalentSrcDir . DIRECTORY_SEPARATOR .'XmlStringValidator.class.php';
 require_once $equivalentSrcDir . DIRECTORY_SEPARATOR .'XmlFileValidator.class.php';
-require_once $equivalentSrcDir . DIRECTORY_SEPARATOR .'../../File/File.class.php';
+require_once $equivalentSrcDir . DIRECTORY_SEPARATOR .'../../file/File.class.php';
 
 /**
  * XmlStringValidatorTest
@@ -13,8 +13,8 @@ require_once $equivalentSrcDir . DIRECTORY_SEPARATOR .'../../File/File.class.php
  * @package		unittests
  * @subpackage          PhpClassLoader
  *
- * @link		%projecturl%/%articles%/PhpClassLoaderTestsSuite
- * @author		colleagues of @peter_shaw
+ * @link		https://github.com/petershaw/PhpClassLoader/wiki/PCLTestsSuite
+ * @author		@peter_shaw
  *
  * @version		1.0.0
  * @since               1.0.0

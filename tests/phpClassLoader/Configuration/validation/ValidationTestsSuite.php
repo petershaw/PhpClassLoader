@@ -13,7 +13,7 @@ require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'XmlStringValidatorTest.php
  * @package		unittests
  * @subpackage          PhpClassLoader
  *
- * @link		%projecturl%/%articles%/PhpClassLoaderTestsSuite
+ * @link		https://github.com/petershaw/PhpClassLoader/wiki/PCLTestsSuite
  * @author		colleagues of @peter_shaw
  *
  * @version		1.0.0

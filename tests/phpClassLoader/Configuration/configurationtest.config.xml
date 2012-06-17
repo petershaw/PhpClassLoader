@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<setup>
+	<parameters>
 		<define variable="u" type="string"
 			value="uuu" />
 		<define variable="testdefine" type="string"
@@ -10,30 +10,5 @@
 		<define variable="thirdtestdefine" type="string">
 			foo bar test
 		</define>
-	</setup>
-
-	<psb enable="true">
-		<access name="configuration_test" class="ConfigurationTest" method="esbTest">
-			<parameters>
-				<param name="a" type="String" required="true"/>
-			</parameters>
-			<returns>
-				<param name="ret" type="String" />
-			</returns>
-			<!-- 
-			<restrictions>
-				<restrict type="host" value="127.0.0.1" />
-				<restrict type="valid-user">
-					<provider class="Access::VaildUser">
-						<param name="hasgroup" type="String">www</param>
-					</provider>
-				</restrict>
-			</restrictions>
-			-->
-		</access>
-	</psb>
-	 -->
-	<log>
-		<logger handle="Logger::default" mode="info" />
-	</log>
+	</parameters>
 </configuration>

@@ -1,5 +1,22 @@
 <?xml version="1.0"  encoding="UTF-8" ?>
 
+<!--
+/**
+ * PhpClassLoader buildfile
+ * ============================
+ * use phing to build the PhpClassloader
+ *
+ * @package		Build
+ * @subpackage          PhpClassLoader
+ *
+ * @link		https://github.com/petershaw/PhpClassLoader/wiki/Build-and-Install
+ * @author		@peter_shaw
+ *
+ * @version		1.0.0
+ * @since               1.0.0
+ *
+ */
+-->
 <project name="PhpClassLoader" basedir="." default="main">
     <property file="build.properties" />
     

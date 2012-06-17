@@ -1,8 +1,8 @@
 <?php
 
 $equivalentSrcDir = str_replace("tests", "php-inc", dirname(__FILE__));
-require_once $equivalentSrcDir. DIRECTORY_SEPARATOR .'Validation/XmlFileValidator.class.php';
-require_once $equivalentSrcDir. DIRECTORY_SEPARATOR .'../File/File.class.php';
+require_once $equivalentSrcDir . DIRECTORY_SEPARATOR . 'validation/XmlFileValidator.class.php';
+require_once $equivalentSrcDir . DIRECTORY_SEPARATOR . '../file/File.class.php';
 
 /**
  * SelfConfigurationTest
@@ -13,7 +13,7 @@ require_once $equivalentSrcDir. DIRECTORY_SEPARATOR .'../File/File.class.php';
  * @package		unittests
  * @subpackage          PhpClassLoader
  *
- * @link		%projecturl%/%articles%/PhpClassLoaderTestsSuite
+ * @link		https://github.com/petershaw/PhpClassLoader/wiki/PCLTestsSuite
  * @author		@peter_shaw
  *
  * @version		1.0.0
@@ -42,7 +42,7 @@ class SelfConfigurationTest extends PHPUnit_Framework_TestCase {
      */
     public function test_Valid() {
         echo "| test test_Valid\n";
-        $SCConfigurationIncDir = preg_replace("/\/test\//", "/php-inc/", dirname(__FILE__));
+        $SCConfigurationIncDir = preg_replace("/\/tests\//", "/php-inc/", dirname(__FILE__));
         $XmlValidator = new XmlFileValidator(new File($SCConfigurationIncDir . "/configuration.config.xml"), new File($SCConfigurationIncDir . "/configuration.xsd"));
         $this->assertTrue($XmlValidator->getResult(), "The connfiguration of the configuration component is not valid..");
     }

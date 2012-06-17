@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+	<!--  Root  -->
+    <xs:element name="configuration">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration of the component.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="parameters" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The setup-section is used as
+                            startup-configuration.
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="define" type="eDefine"
+                                                                    minOccurs="0" maxOccurs="unbounded">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        Define a variable to configurate
+                                        the component. See component
+                                        Details for available
+                                        parameters.
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+	<!--  Elementtypes  -->
+    <xs:complexType name="eDefine">
+        <xs:sequence></xs:sequence>
+        <xs:attribute name="variable" use="required" type="xs:token">
+            <xs:annotation>
+                <xs:documentation>
+                    Every component provides a different set of
+                    variables you can -or have to- set via the
+                    configurationfile.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="type" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    Select the Type of the definevalue.
+                </xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="file" />
+                    <xs:enumeration value="env" />
+                    <xs:enumeration value="lookup" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="value" type="xs:string" use="optional" />
+    </xs:complexType>
+
+</xs:schema>

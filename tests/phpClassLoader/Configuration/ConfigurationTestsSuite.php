@@ -1,8 +1,8 @@
 <?php
 
 // include all tests for the configuration
-require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'SelfConfigurationTest.php';
-require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'ConfigurationTest.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SelfConfigurationTest.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'ConfigurationTest.php';
 
 /**
  * ConfigurationTestsSuite
@@ -14,7 +14,7 @@ require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'ConfigurationTest.php';
  * @package		unittests
  * @subpackage          PhpClassLoader
  *
- * @link		%projecturl%/%articles%/PhpClassLoaderTestsSuite
+ * @link		https://github.com/petershaw/PhpClassLoader/wiki/PCLTestsSuite
  * @author		@peter_shaw
  *
  * @version		1.0.0
@@ -36,7 +36,7 @@ class ConfigurationTestsSuite extends PHPUnit_Framework_TestSuite {
         echo("/ run SelfConfigurationTest ----------------------\n");
         $this->addTestSuite('SelfConfigurationTest');
         echo("\ end SelfConfigurationTest ----------------------\n");
-        
+
         echo("/ run ConfigurationTest --------------------------\n");
         $this->addTestSuite('ConfigurationTest');
         echo("\ end ConfigurationTest --------------------------\n");
