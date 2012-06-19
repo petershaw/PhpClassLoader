@@ -38,7 +38,6 @@ class ClassLoaderFlatfileTest extends PHPUnit_Framework_TestCase implements PHPU
         $this->classcache = new ClassLoader("classloadertest", dirname(__FILE__));
         $this->classcache->mode = 'flatfile';
         $file = $this->classcache->getCacheFile();
-        echo "USING: " . ClassLoader::getCacheFile();
     }
 
     /**

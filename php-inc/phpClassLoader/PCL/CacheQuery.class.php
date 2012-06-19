@@ -1,6 +1,7 @@
 <?php
 
-require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'ClassLoader.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'ClassLoader.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SimpleLogger.class.php';
 
 /**
  * CacheQuery<br />
@@ -71,24 +72,23 @@ class CacheQuery {
      * @var boolean 
      */
     private static $force_rebuild;
-
     private $logger;
-    
+
     /**
      * Load the cachefile contents
      * 
      * @param string $mode
      */
-    private function __construct($mode = '') {
+    private function __construct($mode) {
         $this->mode = $mode;
         $this->logger = new SimpleLogger();
-        $this->cacheBase = new CacheBase ( );
+        $this->cacheBase = new CacheBase($this->mode);
         if (file_exists(ClassLoader::getCacheFile())) {
             //handle according to mode set in ClassLoader, load it
             switch ($this->mode) {
                 //flatfile
-                case 'flatfile' :
-                    require_once (ClassLoader::getCacheFile());
+                case 'flatfile':
+                    require_once(ClassLoader::getCacheFile());
                     if (CacheQuery::$force_rebuild == true) {
                         // Overload ! 
                         $this->known_classes = getCache::getCacheArray();
@@ -96,6 +96,9 @@ class CacheQuery {
                     $this->known_classes = getCache::getCacheArray(); //this class is written as static to the cachefile itself!
                     break;
                 //SQLite make connection
+                case 'sqlite':
+                    $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
+                    break;
                 default :
                     $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
             }
@@ -177,6 +180,7 @@ class CacheQuery {
      * @throws Exception if a class is not found.
      */
     public function getIncludepath($classname) {
+        $classpath = null;
         if ($this->mode == 'flatfile') {
             //flatfile
             $classpath = $this->FlatfileQuery($classname);

@@ -1,22 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<parameters>
-                <!-- 1 sqlite or flatfile -->
-		<define variable="mode" type="string"
-			value="flatfile" />
-		<!-- 2 posibilities: absolute path OR 'system_tmp' to use native system tmp-dir -->
-		<define variable="cachefilepath" type="string"
-			value="system_tmp" />
-		<!-- 2 posibilities: relative (from location of classcache.php) OR absolute path -->
-		<define variable="rootdirmode" type="string"
-			value="relative" />	
-		<define variable="rootdirs_list" type="string">
-		/../../SCUtilities,/../../SCRoot,/../../SCEnvironment,/../../SCComponents,/../../SCApplications,/../../Thirdparty,/../../../php-site/SCSite
-		</define>	
-		<define variable="excludedirs_list" type="string">
-		/.svn,.svn
-		</define>		
-		<define variable="sitewee_support" type="boolean" value="false" />
-	</parameters>
+    <parameters>
+        <!-- 1 sqlite or flatfile -->
+        <define variable="mode" type="string" value="flatfile" />
+                
+	<!-- 2 posibilities: absolute path OR 'system_tmp' to use native system tmp-dir -->
+        <define variable="cachefilepath" type="string" value="system_tmp" />
+                
+	<!-- 2 posibilities: relative (from location of classcache.php) OR absolute path -->
+        <define variable="rootdirmode" type="string" value="relative" />	
+                        
+        <!-- set one or more include directories. If you run in relative
+             rootdirmode everything is relativ to the classloader phar 
+             archive. If not, classloader begin to scan everything that is
+             relativ to the PhpClassLoader directory-->
+        <define variable="include" type="string" value="./" />
+                
+        <!-- exclude pattern thats excludes from the index -->
+        <define variable="exclude" type="string" value=".git" />
+        <define variable="exclude" type="string" value=".svn" />
+                    
+        <!-- lagacy support -->
+        <!--
+        <define variable="rootdirs_list" type="string">
+        /..
+        </define>	
+        <define variable="excludedirs_list" type="string">
+        /.svn,.svn
+        </define>		
+        -->
+    </parameters>
         
 </configuration>

@@ -30,7 +30,7 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      * Called by PHPUnit as kinda consturctor for all methods!
      */
     protected function setUp() {
-        $this->classcache = new ClassLoader(__CLASS__, dirname(__FILE__));
+        $this->classcache =  ClassLoader::getInstance(__CLASS__, dirname(__FILE__), true);
         $this->classcache->mode = 'sqllite';
         $this->classcache->clear();
     }
@@ -39,7 +39,7 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      * Called by PHPUnit as kinda desturctor for all methods!
      */
     protected function tearDown() {
-        unset($this->classcache);
+        //unset($this->classcache);
     }
 
     /**
@@ -47,7 +47,15 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      */
     public function testSQLLoad() {
         echo "| test testSQLLoad\n";
-        $testObj = new uuuxxxgibtsnicht();
+        
+        echo "&&&&& ". $this->classcache->getCacheFile()."\n";
+        echo "&&&&& ". $this->classcache->mode ."\n";
+        echo "&&&&& ". ClassLoader::$custom_conf_class ."\n";
+        echo "&&&&& ". ClassLoader::$custom_conf_dir ."\n";
+        
+        $testObj = new yyyxxxgibtsnicht();
+        $this->assertEquals("for testing", $testObj->reason, "Could not get public property from testcalss-");
+        
         $result = $this->classcache->getAllKnownClasses();
         $this->assertTrue(array_key_exists("uuuxxxgibtsnicht", $result), 'Testclass not found.');
         unset($testObj);

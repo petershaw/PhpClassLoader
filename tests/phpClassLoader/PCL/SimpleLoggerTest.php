@@ -1,7 +1,7 @@
 <?php
 
 $equivalentSrcDir = str_replace("tests", "php-inc", dirname(__FILE__));
-require_once $equivalentSrcDir . DIRECTORY_SEPARATOR . 'SimpleLogger.php';
+require_once $equivalentSrcDir . DIRECTORY_SEPARATOR . 'SimpleLogger.class.php';
 
 /**
  * ClassLoaderTestsSuite

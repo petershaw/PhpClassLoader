@@ -110,33 +110,43 @@ class PCLConfiguration {
      *
      * @param String $name  - Parameter-Key
      * @param Object $default optional - Value if Parameter-ey returns null 
+     * @return string of value or, array of values
      */
     public function getSetupParameter($name, $default = null) {
         if (isset($this->xsearch) == false) {
             throw new NilException('There is no configurationobject for this class loaded.');
         }
-        $type = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/@type');
-        $type = array_shift($type);
-        if ($type == null) {
-            $type = 'string';
-        }
-        $value = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/@value');
-        $value = array_shift($value);
-        if ($value == null) {
-            $value = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/text()');
-            $value = trim(array_shift($value));
-            if ($value == null) {
-                return $default;
+        $typearray = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/@type');
+        for($i=0;$i <= count($typearray) -1; $i++){
+            if ($typearray[$i] == null) {
+                $typearray[$i] = 'string';
             }
         }
-        if (strtolower($type) == 'boolean') {
-            if (strtolower($value) == 'true') {
-                $value = true;
-            } elseif (strtolower($value) == 'false') {
-                $value = false;
+        $valuearray = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/@value');
+        
+        for($i=0; $i <= count($valuearray) -1; $i++){
+            if ($valuearray[$i] == null) {
+                $valuearray[$i] = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/text()');
+                $valuearray[$i] = trim(array_shift($valuearray[$i]));
+                if ($valuearray[$i] == null) {
+                    $valuearray[$i] = $default;
+                }
+            }
+            if (strtolower($valuearray[$i]) == 'boolean') {
+                if (strtolower($valuearray[$i]) == 'true') {
+                    $valuearray[$i] = true;
+                } elseif (strtolower($valuearray[$i]) == 'false') {
+                    $valuearray[$i] = false;
+                }
             }
         }
-        return $value;
+        if($valuearray == null){
+            $valuearray = $this->xsearch->queryArray('/configuration/parameters/define[@variable="' . $name . '"]/text()');
+        }
+        if(count($valuearray) > 1){
+            return $valuearray;
+        }
+        return array_shift($valuearray);
     }
 
     /**

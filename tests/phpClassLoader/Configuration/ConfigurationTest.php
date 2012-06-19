@@ -104,6 +104,20 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($result['testdefine'], "foo", "wrong value.");
         $this->assertEquals($result['thirdtestdefine'], "foo bar test", "wrong value.");
     }
+    
+    /**
+     * Tests Configuration->getSetupParameters()
+     */
+    public function testGetArrayParameters() {
+        echo "| test testGetArrayParameters";
+        $result = $this->Configuration->getSetupParameter('anarrayentry');
+        $this->assertTrue(is_array($result), "a array is expected.");
+
+        $this->assertContains(1, $result, "The Setuppparamenter did not return all integers from a array.");
+        $this->assertContains(2, $result, "The Setuppparamenter did not return all integers from a array.");
+        $this->assertContains(3, $result, "The Setuppparamenter did not return all integers from a array.");
+        $this->assertNotContains(4, $result, "The Setuppparamenter return a array element that is not set.");
+    }
 
 }
 

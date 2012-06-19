@@ -63,7 +63,6 @@ class CacheBase {
      * @param array $excluded_dir_arr masks with directories to skip
      */
     public function buildCache($path, $excluded_dir_arr) {
-
         $dir = new DirectoryIterator($path);
         foreach ($dir as $item) {
             if ($item->isDot()) {
@@ -94,7 +93,6 @@ class CacheBase {
      * @return void
      */
     private function parseFile($fname) {
-
         $tokens = token_get_all(file_get_contents($fname));
         $is_relevant = false;
         foreach ($tokens as $bucket) {
@@ -145,7 +143,6 @@ CONT;
             $sqliteerror = null;
             // CacheBase::$sqlite_connect = sqlite_open ( ClassLoader::getCacheFile (), 0777, $sqliteerror ) ;
             //if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3) {
-            echo('sqlite:' . ClassLoader::getCacheFile() . "\n");
             CacheBase::$sqlite_connect = new PDO('sqlite:' . ClassLoader::getCacheFile());
             //} else {
             //    CacheBase::$sqlite_connect = new SQLite3(ClassLoader::getCacheFile());
@@ -170,9 +167,9 @@ CONT;
         foreach ($this->known_classes as $classname => $path) {
             CacheBase::$sqlite_connect->exec("INSERT INTO classcache VALUES ('$classname', '$path')");
         }
-        if(file_exists(ClassLoader::getCacheFile())){ 
-	chmod(ClassLoader::getCacheFile(), 0777); //make it deletable and executable for other users
-	}
+        if (file_exists(ClassLoader::getCacheFile())) {
+            chmod(ClassLoader::getCacheFile(), 0777); //make it deletable and executable for other users
+        }
     }
 
     /**

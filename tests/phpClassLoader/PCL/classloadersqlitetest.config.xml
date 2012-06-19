@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<parameters>
-		<define variable="mode" type="string"
-			value="sqlite" />
-		<!-- 2 posibilities: absolute path OR 'system_tmp' to use native system tmp-dir -->
-		<define variable="cachefilepath" type="string"
-			value="system_tmp" />
-		<!-- 2 posibilities: relative (from location of classcache.php) OR absolute path -->
-		<define variable="rootdirmode" type="string"
-			value="relative" />	
-		<define variable="rootdirs_list" type="string">
-		/../../../php-inc,/../../../tests
-		</define>	
-		<define variable="excludedirs_list" type="string">
-		/.svn,.svn
-		</define>		
-	</parameters>
+    <parameters>
+        <define variable="mode" type="string" value="sqlite" />
+	
+        <!-- 2 posibilities: absolute path OR 'system_tmp' to use native system tmp-dir -->
+        <define variable="cachefilepath" type="string" value="system_tmp" />
+	
+        <!-- 3 posibilities: relative (from location of classcache.php) OR absolute path -->
+        <define variable="rootdirmode" type="string" value="relative" />	
+		
+        <!-- set one or more include directories. If you run in relative
+            rootdirmode everything is relativ to the classloader phar 
+            archive. If not, everythig is related to the phpClassLoader 
+            directory -->
+        <define variable="include" type="string" value="./" />
+        <define variable="include" type="string" value="../tests/" />
+        
+	<!-- exclude pattern thats excludes from the index -->
+        <define variable="exclude" type="string" value=".git" />
+        <define variable="exclude" type="string" value=".svn" />
+        
+    </parameters>
 </configuration>

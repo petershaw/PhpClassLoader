@@ -10,5 +10,13 @@
 		<define variable="thirdtestdefine" type="string">
 			foo bar test
 		</define>
+                
+                <define variable="anarrayentry" type="integer"
+			value="1" />
+                <define variable="anarrayentry" type="integer"
+			value="2" />
+                <define variable="anarrayentry" type="integer"
+			value="3" />
+                
 	</parameters>
 </configuration>

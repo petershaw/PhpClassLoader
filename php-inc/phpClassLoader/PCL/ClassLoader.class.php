@@ -1,7 +1,7 @@
 <?php
 
-require_once 'CacheBase.class.php';
-require_once 'CacheQuery.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'CacheBase.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'CacheQuery.class.php';
 
 /**
  * ClassLoader<br />
@@ -170,7 +170,7 @@ class ClassLoader {
         ClassLoader::$custom_conf_class = $custom_conf_class;
         ClassLoader::$custom_conf_dir = $custom_conf_dir;
         //import config
-        require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'../configuration/PCLConfiguration.class.php';
+        require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../configuration/PCLConfiguration.class.php';
         if (isset($custom_conf_dir) && isset($custom_conf_class)) {
             $this->config = new PCLConfiguration($custom_conf_class, $custom_conf_dir);
         } else {
@@ -178,7 +178,8 @@ class ClassLoader {
         }
 
         //set mode
-        if (!strpos($this->config->getSetupParameter('mode'), 'sqlite') && !strpos($this->config->getSetupParameter('mode'), 'flatfile')) {
+        if (($this->config->getSetupParameter('mode') == 'sqlite') || 
+            ($this->config->getSetupParameter('mode') == 'flatfile')) {
             $this->mode = $this->config->getSetupParameter('mode');
         } else {
             throw new Exception('Unknown mode (' . $this->config->getSetupParameter('mode') . ') defined in config.');
@@ -218,6 +219,9 @@ class ClassLoader {
         //chdir to target dir to write cachecontent to
         chdir($this->targetdir);
 
+        // reste cachefile to absolut filename
+        ClassLoader::$cache_file = $this->targetdir .ClassLoader::$cache_file;
+        
         //instanciate helpers
         $this->cache_base = new CacheBase($this->mode);
         $this->cache_query = CacheQuery::getInstance($this->mode);
@@ -263,7 +267,10 @@ class ClassLoader {
      */
     public function autoload($classname) {
         //include file
-        require_once ($this->cache_query->getIncludepath($classname));
+        include_once ($this->cache_query->getIncludepath($classname));
+        if(!class_exists($classname)){
+            throw Excepton("Can not include classfile for class ". $classname);
+        }
     }
 
     /**
@@ -275,25 +282,39 @@ class ClassLoader {
         $this->cache_roots_arr = array();
         if ($this->config->getSetupParameter('rootdirmode') == 'relative') {
             //set dirs relative to $targetdir
-            $mydir = dirname(__FILE__);
-            //list or single value
-            if (strpos($this->config->getSetupParameter('rootdirs_list'), ',')) {
-                $rdirs_arr = explode(',', $this->config->getSetupParameter('rootdirs_list'));
-                foreach ($rdirs_arr as $d) {
+            /* if PhpClassLoader_RootDirectory is not set, get a directory above 
+             * the filelocation. PhpClassLoader_RootDirectory will set by Phar 
+             * handler.
+             */
+            $mydirarr = explode(DIRECTORY_SEPARATOR, dirname(__FILE__));
+            array_pop($mydirarr); array_pop($mydirarr);
+            $mydir = implode(DIRECTORY_SEPARATOR, $mydirarr);
+            if(defined("PhpClassLoader_RootDirectory")){
+                // than use the defined one.
+                $mydir = PhpClassLoader_RootDirectory;
+            }
+            // fix path 
+            $seperator = "\\".DIRECTORY_SEPARATOR;
+            if(preg_match("/$seperator$/", $mydir) == false){
+                $mydir = $mydir . DIRECTORY_SEPARATOR;
+            }
+
+            // list or single value
+            if (is_array($this->config->getSetupParameter('include'))) {
+                foreach ($this->config->getSetupParameter('include') as $d) {
                     $this->cache_roots_arr [] = realpath($mydir . $d);
                 }
             } else {
-                $this->cache_roots_arr [] = realpath($mydir . $this->config->getSetupParameter('rootdirs_list'));
+                $this->cache_roots_arr [] = realpath($mydir . $this->config->getSetupParameter('include'));
             }
         } elseif ($this->config->getSetupParameter('rootdirmode') == 'absolute') {
             //list or single value
-            if (strpos($this->config->getSetupParameter('rootdirs_list'), ',')) {
-                $rdirs_arr = explode(',', $this->config->getSetupParameter('rootdirs_list'));
-                foreach ($rdirs_arr as $d) {
+            if (is_array($this->config->getSetupParameter('include'))) {
+                foreach ($this->config->getSetupParameter('include') as $d) {
                     $this->cache_roots_arr [] = $d;
                 }
             } else {
-                $this->cache_roots_arr [] = realpath($this->config->getSetupParameter('rootdirs_list'));
+                $this->cache_roots_arr [] = realpath($this->config->getSetupParameter('include'));
             }
         } else {
             throw new Exception('Unknown rootdirmode (' . $this->config->getSetupParameter('rootdirmode') . ') set in config.');
@@ -315,19 +336,16 @@ class ClassLoader {
         //init
         $this->exclude_dirs_arr = array();
 
-        $exList = $this->config->getSetupParameter('excludedirs_list');
+        $exList = $this->config->getSetupParameter('exclude');
         if (isset($exList)) {
             //list or single value
-            if (strpos($this->config->getSetupParameter('excludedirs_list'), ',')) {
-                $ex_arr = explode(',', $this->config->getSetupParameter('excludedirs_list'));
-                foreach ($ex_arr as $e) {
+            if (is_array($exList)) {
+                foreach ($exList as $e) {
                     $this->exclude_dirs_arr [] = $e;
                 }
             } else {
-                $this->exclude_dirs_arr [] = $this->config->getSetupParameter('exclude_dirs_lists');
+                $this->exclude_dirs_arr [] = $this->config->getSetupParameter('exclude');
             }
-        } else {
-            throw new Exception('Required parameter excludedirs_list has not been set in config.');
         }
         return $this->exclude_dirs_arr;
     }
@@ -368,7 +386,7 @@ class ClassLoader {
         }
     }
 
-        /**
+    /**
      * Clears the cache 
      * @tutorial Attention: do not use this in a reqular code. The rebuild
      * of a cache can be take a lot of time.
@@ -381,7 +399,7 @@ class ClassLoader {
         $this->cache_base->create($this->cache_roots_arr, $this->exclude_dirs_arr, $this->mode);
         $this->cache_query = CacheQuery::getInstance($this->mode, true);
     }
-    
+
     /**
      * Returns the age of the cache.
      * @return int minutes 
@@ -390,7 +408,7 @@ class ClassLoader {
         return round(( ( ( (time() - filectime(ClassLoader::$cache_file)) / 60) / 60) / 24), 2);
     }
 
-        /**
+    /**
      * Returns path systems temporary directory.
      *
      * @param string special_tmp_path optional predefined path
@@ -427,6 +445,7 @@ class ClassLoader {
             }
         }
     }
+
 }
 
 //------------------------------------------------------------------------------
