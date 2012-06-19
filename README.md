@@ -13,4 +13,4 @@ Please take a look at the [Wiki](https://github.com/petershaw/PhpClassLoader/wik
 
 Contact
 --------------------------------------------------------------------------------
-Twitter: (@peter_shaw)[http://twitter.com/peter_shaw]
+Twitter: [@peter_shaw](http://twitter.com/peter_shaw)
