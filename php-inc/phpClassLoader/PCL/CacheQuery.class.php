@@ -79,10 +79,10 @@ class CacheQuery {
      * 
      * @param string $mode
      */
-    private function __construct($mode) {
+    private function __construct($mode, CacheBaseInterface $cachebase) {
         $this->mode = $mode;
         $this->logger = new SimpleLogger();
-        $this->cacheBase = new CacheBase($this->mode);
+        $this->cacheBase = $cachebase;
         if (file_exists(ClassLoader::getCacheFile())) {
             //handle according to mode set in ClassLoader, load it
             switch ($this->mode) {
@@ -147,11 +147,11 @@ class CacheQuery {
      * @return array $known_classes
      */
     public function DBQueryAll() {
-        if (!isset(CacheBase::$sqlite_connect)) {
+        if (!isset(AbstractCacheBase::$sqlite_connect)) {
             $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
         }
         $known_classes = array();
-        $result_arr = CacheBase::$sqlite_connect->query("SELECT * FROM classcache");
+        $result_arr = AbstractCacheBase::$sqlite_connect->query("SELECT * FROM classcache");
         foreach ($result_arr as $r) {
             $known_classes [$r ['classname']] = $r ['path'];
         }
@@ -164,10 +164,10 @@ class CacheQuery {
      * @return object CacheQuery
      * @static
      */
-    public static function getInstance($mode = '', $force_rebuild = false) {
+    public static function getInstance($mode = '', CacheBaseInterface $cachebase, $force_rebuild = false) {
         CacheQuery::$force_rebuild = $force_rebuild;
         if (CacheQuery::$singleton == null || $force_rebuild == true) {
-            CacheQuery::$singleton = new CacheQuery($mode);
+            CacheQuery::$singleton = new CacheQuery($mode, $cachebase);
         }
         return CacheQuery::$singleton;
     }
@@ -181,6 +181,7 @@ class CacheQuery {
      */
     public function getIncludepath($classname) {
         $classpath = null;
+echo "Q: [". $classname ."] mode=". $this->mode . " clmode=". ClassLoader::$mode ."\n";
         if ($this->mode == 'flatfile') {
             //flatfile
             $classpath = $this->FlatfileQuery($classname);
@@ -195,15 +196,17 @@ class CacheQuery {
             $this->logger->log(SimpleLogger::INFO, 'Rebuild of classcache triggered caused by missing class "' . $this->searched_classname . '".');
             //trigger real error if rebuilding did not help
             if ($this->cacheBase->build_counter > 0) {
-                $this->logger->log(SimpleLogger::ERROR, 'Despite rebuild of classcache the required class "' . $this->searched_classname . '" could not be found.');
+                $this->logger->log(SimpleLogger::ERROR, 'Despite rebuild of classcache ('. $this->mode .') the required class "' . $this->searched_classname . '" could not be found.');
             }
             //recal build-process once
             ClassLoader::$ClassLoader = ClassLoader::getInstance(ClassLoader::$custom_conf_class, ClassLoader::$custom_conf_dir, true);
             $this->cacheBase->build_counter++;
             //read result from array in memory from rebuild
-            if (isset(ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname])) {
+            /* if (isset(ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname])) {
                 $classpath = ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname];
-            }
+            } */
+echo "Second try after rebuild\n";
+            return $this->getIncludepath($classname);
         }
         //handle case when no path can be returned
         if (!isset($classpath)) {

@@ -32,11 +32,13 @@ class ClassLoaderFlatfileTest extends PHPUnit_Framework_TestCase implements PHPU
      * Called by PHPUnit as kinda consturctor for all methods!
      */
     protected function setUp() {
+echo "SetUp: classloadertest, in ". dirname(__FILE__) ."\n";
+        $this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__), true);
         if (file_exists(ClassLoader::getCacheFile())) {
             unlink(ClassLoader::getCacheFile());
         }
-        $this->classcache = new ClassLoader("classloadertest", dirname(__FILE__));
-        $this->classcache->mode = 'flatfile';
+        //$this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__));
+        ClassLoader::$mode = 'flatfile';
         $file = $this->classcache->getCacheFile();
     }
 
@@ -50,8 +52,8 @@ class ClassLoaderFlatfileTest extends PHPUnit_Framework_TestCase implements PHPU
     /**
      * Test: Load a Class
      */
-    public function testLoad() {
-        echo "| test testLoad\n";
+    public function testLoadOnFlatfile() {
+        echo "| test testLoadOnFlatfile \n";
         $testObj = new uuuxxxgibtsnicht();
         $result = $this->classcache->getAllKnownClasses();
         $this->assertTrue(array_key_exists("uuuxxxgibtsnicht", $result), 'Testclass not found.');

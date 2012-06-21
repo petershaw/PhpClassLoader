@@ -28,9 +28,9 @@ class ClassLoaderTest extends PHPUnit_Framework_TestCase implements PHPUnit_Fram
      * Called by PHPUnit as kinda consturctor for all methods!
      */
     protected function setUp() {
-        $this->classcache = new ClassLoader("classloadertest", dirname(__FILE__));
+        $this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__), true);
         // we use the flatfile, because it is the easiest and well tested one.
-        $this->classcache->mode = 'flatfile';
+        ClassLoader::$mode = 'flatfile';
     }
 
     /**
@@ -60,8 +60,8 @@ class ClassLoaderTest extends PHPUnit_Framework_TestCase implements PHPUnit_Fram
             }
         }
 
-        $this->classcache = new ClassLoader("classloadertest", dirname(__FILE__));
-        $this->classcache->mode = 'flatfile';
+        $this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__), true);
+        ClassLoader::$mode = 'flatfile';
         $file = $this->classcache->getCacheFile();
         echo "USING: " . ClassLoader::getCacheFile() ."\n\n";
 

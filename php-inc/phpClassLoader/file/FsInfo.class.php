@@ -31,7 +31,7 @@ abstract class FsInfo {
      * @param string special_tmp_path optional predefined path
      * @return string path or null
      */
-    public static function getTempFilepath() {
+    public static function getTemporaryDirectory() {
         //1st use php internal sys_get_temp_dir()
         if (function_exists('sys_get_temp_dir')) {
             $sys_get_temp_dir = sys_get_temp_dir();
