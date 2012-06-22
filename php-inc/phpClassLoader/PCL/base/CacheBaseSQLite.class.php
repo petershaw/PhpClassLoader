@@ -20,9 +20,22 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'AbstractCacheBase.class.
  */
 class CacheBaseSQLite extends AbstractCacheBase {
 
-    public function __construct() {
+    /**
+     * SQLite static connection handle
+     *
+     * @var ressource
+     */
+    private static $sqlite_connect;
+    
+     public function __construct($cache_roots_arr, $exclude_dirs_arr) {
         parent::__construct('sqlite');
+        $this->cache_roots_arr = $cache_roots_arr;
+        $this->exclude_dirs_arr = $exclude_dirs_arr;
+        if (file_exists(ClassLoader::getCacheFile())) {
+            $this->DBConnect(ClassLoader::getCacheFile());
+        }
     }
+    
     
     /**
      * Creates the cachebase
@@ -31,24 +44,76 @@ class CacheBaseSQLite extends AbstractCacheBase {
      * @param array $exclude_dirs_arr
      * @return void
      */
-    public function createCache($cache_roots_arr, $exclude_dirs_arr) {
+    public function createCache() {
         //build new cache and save it to the filesystem
-        if (count($cache_roots_arr) > 0) {
-            foreach ($cache_roots_arr as $path) {
+        if (count($this->cache_roots_arr) > 0) {
+            foreach ($this->cache_roots_arr as $path) {
                 if (strlen($path) > 0) {
-                    $this->buildCache($path, $exclude_dirs_arr);
+                    $this->buildCache($path, $this->exclude_dirs_arr);
                 }
             }
         } else {
             throw new Exception('No directories to be scanned have been defined in property "cache_roots_arr".');
         }
-        $this->writeSQLiteDB();
+        $this->writeCache();
     }
-
+    
+    public function rebuildCache() {
+        ;
+    }
+    
     public function writeCache() {
-        
+        if (!isset(CacheBaseSQLite::$sqlite_connect)) {
+            $this->DBConnect(ClassLoader::getCacheFile());
+        }
+        CacheBaseSQLite::$sqlite_connect->exec('CREATE TABLE classcache ( classname varchar(60) PRIMARY KEY, path varchar(200) );')
+                or new Exception('Can not create the Classcache-Table');
+        foreach ($this->known_classes as $classname => $path) {
+            CacheBaseSQLite::$sqlite_connect->exec("INSERT INTO classcache VALUES ('$classname', '$path')");
+        }
+        if (file_exists(ClassLoader::getCacheFile())) {
+            chmod(ClassLoader::getCacheFile(), 0777); //make it deletable and executable for other users
+            return true;
+        }
+        return false;
+    }
+    
+        /**
+     * Connect to or create no existing SQLite-DB file
+     * 
+     * @param string $dbfile filename
+     * @return db handle of connection
+     */
+    private function DBConnect($dbfile) {
+            $sqliteerror = null;
+            // CacheBase::$sqlite_connect = sqlite_open ( ClassLoader::getCacheFile (), 0777, $sqliteerror ) ;
+            //if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3) {
+            CacheBaseSQLite::$sqlite_connect = new PDO('sqlite:' . ClassLoader::getCacheFile());
+            //} else {
+            //    CacheBase::$sqlite_connect = new SQLite3(ClassLoader::getCacheFile());
+            //}
+            if (!empty($sqliteerror) || CacheBaseSQLite::$sqlite_connect == null) {
+                throw new Exception('DB-file could not be opened: ' . $dbfile . '. SQLite-error:' . $sqliteerror);
+            }
+    }
+    
+    public function query($classname){
+        $res_arr = CacheBaseSQLite::$sqlite_connect->query("SELECT path FROM classcache WHERE classname='$classname'");
+echo "RESULT: \n";
+        print_r($res_arr);
+        if(is_array($res_arr) && count($res_arr) > 0){
+            return array_shift($res_arr);
+        }
     }
 
+    public function getKnownClasses(){
+        $known_classes = array();
+        $result_arr = CacheBaseSQLite::$sqlite_connect->query("SELECT * FROM classcache");
+        foreach ($result_arr as $r) {
+            $known_classes [$r['classname']] = $r['path'];
+        }
+        return $known_classes;
+    }
 }
 
 ?>

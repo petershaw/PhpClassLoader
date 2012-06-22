@@ -35,19 +35,16 @@ abstract class AbstractCacheBase implements CacheBaseInterface {
      */
     public $build_counter = 0;
 
+    protected $cache_roots_arr;
+            
+    protected $exclude_dirs_arr;
+    
     /**
      * Mode (sqlite, flatfile, ...)
      *
      * @var string
      */
     private $mode;
-
-    /**
-     * SQLite static connection handle
-     *
-     * @var ressource
-     */
-    public static $sqlite_connect;
 
     /**
      * Import $mode
@@ -58,13 +55,16 @@ abstract class AbstractCacheBase implements CacheBaseInterface {
         $this->mode = $mode;
     }
 
+    public function getMode(){
+        return $this->mode;
+    }
     /**
      * Walk through project directories recursively to build ClassCache.
      *
      * @param string $path
      * @param array $excluded_dir_arr masks with directories to skip
      */
-    public function buildCache($path, $excluded_dir_arr) {
+    public final function buildCache($path, $excluded_dir_arr) {
         $dir = new DirectoryIterator($path);
         foreach ($dir as $item) {
             if ($item->isDot()) {
@@ -94,7 +94,7 @@ abstract class AbstractCacheBase implements CacheBaseInterface {
      * @param string $fname filepath of file to be parsed
      * @return void
      */
-    private function parseFile($fname) {
+    private final function parseFile($fname) {
         $tokens = token_get_all(file_get_contents($fname));
         $is_relevant = false;
         foreach ($tokens as $bucket) {
@@ -114,67 +114,6 @@ abstract class AbstractCacheBase implements CacheBaseInterface {
             }
         }
     }
-
-    /**
-     * Writes cache file to filesystem in a flatfile.
-     *
-     * @return boolean result
-     */
-    public function writeFlatfile() {
-        $printed_array = var_export($this->known_classes, true);
-        $file_content = <<<CONT
-<?php class getCache { public static function getCacheArray() { return $printed_array; }} ?>
-CONT;
-        $result = file_put_contents(ClassLoader::getCacheFile(), $file_content);
-        if ($result !== false) {
-            chmod(ClassLoader::getCacheFile(), 0777); //make it deletable and executable for other users
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Connect to or create no existing SQLite-DB file
-     * 
-     * @param string $dbfile filename
-     * @return db handle of connection
-     */
-    public function DBConnect($dbfile) {
-        if (!isset(AbstractCacheBase::$sqlite_connect)) {
-            $sqliteerror = null;
-            // CacheBase::$sqlite_connect = sqlite_open ( ClassLoader::getCacheFile (), 0777, $sqliteerror ) ;
-            //if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3) {
-            AbstractCacheBase::$sqlite_connect = new PDO('sqlite:' . ClassLoader::getCacheFile());
-            //} else {
-            //    CacheBase::$sqlite_connect = new SQLite3(ClassLoader::getCacheFile());
-            //}
-            if (!empty($sqliteerror) || AbstractCacheBase::$sqlite_connect == null) {
-                throw new Exception('DB-file could not be opened: ' . $dbfile . '. SQLite-error:' . $sqliteerror);
-            }
-        }
-    }
-
-    /**
-     * Writes cache to filesystem into sqlite-db
-     * 
-     * @return void
-     */
-    public function writeSQLiteDB() {
-        if (!isset(AbstractCacheBase::$sqlite_connect)) {
-            $this->DBConnect(ClassLoader::getCacheFile());
-        }
-        AbstractCacheBase::$sqlite_connect->exec('CREATE TABLE classcache ( classname varchar(60) PRIMARY KEY, path varchar(200) );')
-                or new Exception('Can not create the Classcache-Table');
-        foreach ($this->known_classes as $classname => $path) {
-            AbstractCacheBase::$sqlite_connect->exec("INSERT INTO classcache VALUES ('$classname', '$path')");
-        }
-        if (file_exists(ClassLoader::getCacheFile())) {
-            chmod(ClassLoader::getCacheFile(), 0777); //make it deletable and executable for other users
-        }
-    }
-
-
 
 }
 

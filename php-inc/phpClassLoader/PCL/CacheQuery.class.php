@@ -24,26 +24,11 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SimpleLogger.class.php';
 class CacheQuery {
 
     /**
-     * Single instance of class CacheQuery
-     *
-     * @var object CacheQuery
-     * @static
-     */
-    private static $singleton;
-
-    /**
      * Array of known classes
      *
      * @var array $known_classes
      */
     public $known_classes;
-
-    /**
-     * Mode (sqlite, flatfile, ...)
-     *
-     * @var string
-     */
-    private $mode;
 
     /**
      * Instance of CacheBase
@@ -59,19 +44,6 @@ class CacheQuery {
      */
     public $searched_classname;
 
-    /**
-     * Directory to save cache file to
-     *
-     * @var string path to directory
-     */
-    public $targetdir;
-
-    /**
-     * Set force_rebuild to rebuild the cache on the next touch.
-     * 
-     * @var boolean 
-     */
-    private static $force_rebuild;
     private $logger;
 
     /**
@@ -79,97 +51,9 @@ class CacheQuery {
      * 
      * @param string $mode
      */
-    private function __construct($mode, CacheBaseInterface $cachebase) {
-        $this->mode = $mode;
-        $this->logger = new SimpleLogger();
+    public function __construct(CacheBaseInterface $cachebase) {
         $this->cacheBase = $cachebase;
-        if (file_exists(ClassLoader::getCacheFile())) {
-            //handle according to mode set in ClassLoader, load it
-            switch ($this->mode) {
-                //flatfile
-                case 'flatfile':
-                    require_once(ClassLoader::getCacheFile());
-                    if (CacheQuery::$force_rebuild == true) {
-                        // Overload ! 
-                        $this->known_classes = getCache::getCacheArray();
-                    } // evnt. else... weil $this->known_classes bereits richtig gefüllt ist? 
-                    $this->known_classes = getCache::getCacheArray(); //this class is written as static to the cachefile itself!
-                    break;
-                //SQLite make connection
-                case 'sqlite':
-                    $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
-                    break;
-                default :
-                    $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
-            }
-        }
-    }
-
-    /**
-     * @todo needs documentation
-     * @param type $dir 
-     */
-    function setTargetDir($dir) {
-        $this->targetdir = $dir;
-    }
-
-    /**
-     * Query flattfile-base for path
-     *
-     * @param string $classname
-     * @return string $classpath
-     */
-    private function FlatfileQuery($classname) {
-        if (isset($this->known_classes [$classname])) {
-            return $this->known_classes [$classname];
-        }
-    }
-
-    /**
-     * Query SQLite-DB-base for one path
-     *
-     * @param string $classname
-     * @return string $classpath
-     */
-    private function DBQueryOne($classname) {
-        if (!isset(CacheBase::$sqlite_connect)) {
-            $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
-        }
-        $res = sqlite_query(CacheBase::$sqlite_connect, "SELECT path FROM ClassLoader WHERE classname='$classname'");
-        $classpath = sqlite_fetch_single($res);
-        return $classpath;
-    }
-
-    /**
-     * Returns all classes that are handled by the classlaoder.
-     *
-     * @param void
-     * @return array $known_classes
-     */
-    public function DBQueryAll() {
-        if (!isset(AbstractCacheBase::$sqlite_connect)) {
-            $this->cacheBase->DBConnect(ClassLoader::getCacheFile());
-        }
-        $known_classes = array();
-        $result_arr = AbstractCacheBase::$sqlite_connect->query("SELECT * FROM classcache");
-        foreach ($result_arr as $r) {
-            $known_classes [$r ['classname']] = $r ['path'];
-        }
-        return $known_classes;
-    }
-
-    /**
-     * Singleton of CacheQuery
-     *
-     * @return object CacheQuery
-     * @static
-     */
-    public static function getInstance($mode = '', CacheBaseInterface $cachebase, $force_rebuild = false) {
-        CacheQuery::$force_rebuild = $force_rebuild;
-        if (CacheQuery::$singleton == null || $force_rebuild == true) {
-            CacheQuery::$singleton = new CacheQuery($mode, $cachebase);
-        }
-        return CacheQuery::$singleton;
+        $this->logger = new SimpleLogger();
     }
 
     /**
@@ -181,14 +65,10 @@ class CacheQuery {
      */
     public function getIncludepath($classname) {
         $classpath = null;
-echo "Q: [". $classname ."] mode=". $this->mode . " clmode=". ClassLoader::$mode ."\n";
-        if ($this->mode == 'flatfile') {
-            //flatfile
-            $classpath = $this->FlatfileQuery($classname);
-        } else {
-            //SQLite
-            $classpath = $this->DBQueryOne($classname);
-        }
+echo "Q: [". $classname ."] clmode=". ClassLoader::$mode .", Cache_Base Mode: ". $this->cacheBase->getMode() ."\n";
+        
+        $classpath = $this->cacheBase->query($classname);
+        
         //try one rebuild
         if (empty($classpath) && $this->cacheBase->build_counter == 0) {
             //save classname in singleton, it would otherwise be lost from this point
@@ -211,7 +91,7 @@ echo "Second try after rebuild\n";
         //handle case when no path can be returned
         if (!isset($classpath)) {
             eval("class $classname{};"); //hack to make autoload throw a regular exception
-            throw new Exception('Could not find required class ("' . $classname . '") in ClassLoader.' . "\n" . '[1] If new classes have been added to the system, ClassLoader must be rebuilt! Please delete the cache file ' . $this->targetdir . '/' . ClassLoader::getCacheFile() . ' to rebuild the cache and reload.' . "\n" . '[2] The required class lies in an excluded directory. Check ClassLoader::defineExcludeList() and rebuild cache on any changes.' . "\n" . 'Called from:\n');
+            throw new Exception('Could not find required class ("' . $classname . '") in ClassLoader.' . "\n" . '[1] If new classes have been added to the system, ClassLoader must be rebuilt! Please delete the cache file ' . ClassLoader::getCacheFile() . ' to rebuild the cache and reload.' . "\n" . '[2] The required class lies in an excluded directory. Check ClassLoader::defineExcludeList() and rebuild cache on any changes.' . "\n" . 'Called from:\n');
             die('Execution stopped.');
         }
         return $classpath;

@@ -30,7 +30,9 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      * Called by PHPUnit as kinda consturctor for all methods!
      */
     protected function setUp() {
-        $this->classcache =  ClassLoader::getInstance(__CLASS__, dirname(__FILE__), true);
+        echo "---- setup sqllite test\n";
+        
+        $this->classcache =  ClassLoader::getInstance('classloadersqlitetest', dirname(__FILE__), true);
         ClassLoader::$mode = 'sqllite';
         $this->classcache->clear();
     }
@@ -47,7 +49,7 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      */
     public function testSQLLoad() {
         echo "| test testSQLLoad\n";
-        
+        $this->classcache =  ClassLoader::getInstance('classloadersqlitetest', dirname(__FILE__), true);
         echo "&&&&& ". $this->classcache->getCacheFile()."\n";
         echo "&&&&& ". ClassLoader::$mode ."\n";
         echo "&&&&& ". ClassLoader::$custom_conf_class ."\n";
@@ -60,6 +62,8 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
         $result = $this->classcache->getAllKnownClasses();
         $this->assertTrue(array_key_exists("yyyxxxgibtsnicht", $result), 'Testclass not found.');
         unset($testObj);
+        
+        echo "********************************************** \n";
     }
 
 }

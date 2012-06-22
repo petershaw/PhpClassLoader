@@ -111,8 +111,8 @@ class ClassLoader {
     /**
      * Subclass instances
      */
-    private $cache_base;
-    private $cache_query;
+    private static $cache_base;
+    private static $cache_query;
 
     /**
      * Set mode of ClassLoader. Possible values:
@@ -162,10 +162,9 @@ class ClassLoader {
      *
      * @param string $custom_conf_class optional class of cachefile-config. Default: uses system ClassLoader
      * @param string $custom_conf_dir optional directory of cachefile-config. 
-     * @param $force_rebuild optional should be set to false, default is false. Only CacheQuery use this flag to reforce a second build
      * @throws Exception on several no-go configurations
      */
-    private function __construct($custom_conf_class = null, $custom_conf_dir = null, $force_rebuild = false) {
+    private function __construct($custom_conf_class = null, $custom_conf_dir = null) {
         // Set the classloader and the classdir static, in case of a rebuild from 
         // CacheBase.
 echo "Construct ". $custom_conf_class .", ". $custom_conf_dir ."\n";
@@ -204,9 +203,11 @@ echo "Construct with mode: ". self::$mode ."\n";
             case 'flatfile' :
                 ClassLoader::$cache_file = 'class_cache.' . str_replace("/", "_", $documentRoot) . '.tmp.php';
                 break;
-            default :
-                // default is sqlite
+            case 'sqlite' :
                 ClassLoader::$cache_file = 'class_cache.' . str_replace("/", "_", $documentRoot) . '.tmp.db';
+                break;
+            default :
+                throw new Exception("Unknown mode '". self::$mode ."' in ". __CLASS__);
         }
 
         //decide for temp or custom directory used to save the cache file
@@ -224,31 +225,25 @@ echo "Construct with mode: ". self::$mode ."\n";
 
         // reste cachefile to absolut filename
         ClassLoader::$cache_file = $this->targetdir .ClassLoader::$cache_file;
-        
-        //instanciate helpers
-        if(self::$mode == 'flatfile'){
-            $this->cache_base = new CacheBaseFlatfile();
-        } elseif(self::$mode == 'sqlite'){
-            $this->cache_base = new CacheBaseSQLite();
-        } else {
-            throw new Exception("Unknown mode '". self::$mode ."' in ". __CLASS__);
-        }
-
-        $this->cache_query = CacheQuery::getInstance(self::$mode, $this->cache_base);
-        $this->cache_query->setTargetDir($this->targetdir);
 
         //defines array of dirs to be scanned from config (leave here since it is called by infoscripts)
         $this->defineRootDirs();
 
         //defines exclude list of dirs from config (leave here since it is called by infoscripts)
         $this->defineExcludeList();
-
-        //create cache
-        if (!file_exists(ClassLoader::getCacheFile()) || $force_rebuild == true) {
-            //create a new cache base according to mode
-            $this->cache_base->createCache($this->cache_roots_arr, $this->exclude_dirs_arr);
-            $this->cache_query = CacheQuery::getInstance(self::$mode, $this->cache_base, true);
+        
+        //instanciate helpers
+echo "CACHE BASE FOR MODE: ". self::$mode ."\n";
+        if(self::$mode == 'flatfile'){
+            ClassLoader::$cache_base = new CacheBaseFlatfile($this->cache_roots_arr, $this->exclude_dirs_arr);
+        } elseif(self::$mode == 'sqlite'){
+            ClassLoader::$cache_base = new CacheBaseSQLite($this->cache_roots_arr, $this->exclude_dirs_arr);
+        } else {
+            throw new Exception("Unknown mode '". self::$mode ."' in ". __CLASS__);
         }
+echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
+        ClassLoader::$cache_query = new CacheQuery(ClassLoader::$cache_base);
+
         ClassLoader::$ClassLoader = $this;
     }
 
@@ -263,19 +258,30 @@ echo "Construct with mode: ". self::$mode ."\n";
      * @static
      */
     public static function getInstance($custom_conf_class = null, $custom_conf_dir = null, $force_rebuild = false) {
-echo "XX: ". is_null(ClassLoader::$ClassLoader) .", ". $force_rebuild ."\n";
+        echo "Build static ClassLoader get instanc: ". $custom_conf_class .",". $custom_conf_dir ."\n";
         if (is_null(ClassLoader::$ClassLoader) || $force_rebuild == true) {
-            if(isset($custom_conf_class) == false && isset(ClassLoader::$custom_conf_class) == true){
-                $custom_conf_class = ClassLoader::$custom_conf_class;
+            if($force_rebuild == false){
+                if((isset($custom_conf_class) == false && isset(ClassLoader::$custom_conf_class) == true)){
+                    $custom_conf_class = ClassLoader::$custom_conf_class;
+                }
+                if((isset($custom_conf_dir) == false && isset(ClassLoader::$custom_conf_dir) == true)){
+                    $custom_conf_dir = ClassLoader::$custom_conf_dir;
+                }
             }
-            if(isset($custom_conf_dir) == false && isset(ClassLoader::$custom_conf_dir) == true){
-                $custom_conf_dir = ClassLoader::$custom_conf_dir;
-            }
-echo "Rebuild ClassLoader with config: ". $custom_conf_class .",". $custom_conf_dir .", ". $force_rebuild ."\n";
-            ClassLoader::$ClassLoader = new ClassLoader($custom_conf_class, $custom_conf_dir, $force_rebuild);
+            echo "Build static ClassLoader with config: ". $custom_conf_class .",". $custom_conf_dir ."\n";
+            ClassLoader::$ClassLoader = new ClassLoader($custom_conf_class, $custom_conf_dir);
         } else {
-echo "Return the existing ClassLoader.\n";
+            echo "Return the existing ClassLoader.\n";
         }
+
+        //create cache
+        if (!file_exists(ClassLoader::getCacheFile()) || $force_rebuild == true) {
+            //create a new cache base according to mode
+            ClassLoader::$cache_base->createCache();
+            ClassLoader::$cache_base->rebuildCache();
+            ClassLoader::$cache_query = new CacheQuery(ClassLoader::$cache_base);
+        }
+        
         return ClassLoader::$ClassLoader;
     }
 
@@ -287,7 +293,8 @@ echo "Return the existing ClassLoader.\n";
      */
     public function autoload($classname) {
         //include file
-        include_once ($this->cache_query->getIncludepath($classname));
+        echo "AUTOLOAD: ". ClassLoader::$cache_base->getMode() .", ". ClassLoader::$mode ." - " ."\n";
+        include_once (ClassLoader::$cache_query->getIncludepath($classname));
         if(!class_exists($classname)){
             throw Excepton("Can not include classfile for class ". $classname);
         }
@@ -376,13 +383,7 @@ echo "Return the existing ClassLoader.\n";
      * @return array of all known_classes
      */
     public function getAllKnownClasses() {
-        switch (self::$mode) {
-            //flatfile
-            case 'flatfile' :
-                return $this->cache_query->known_classes;
-            default :
-                return $this->cache_query->DBQueryAll();
-        }
+        return ClassLoader::$cache_base->getKnownClasses();
     }
 
     /**
@@ -416,8 +417,9 @@ echo "Return the existing ClassLoader.\n";
         if (file_exists(ClassLoader::$cache_file)) {
             unlink(ClassLoader::$cache_file);
         }
-        $this->cache_base->createCache($this->cache_roots_arr, $this->exclude_dirs_arr);
-        $this->cache_query = CacheQuery::getInstance(self::$mode, $this->cache_base, true);
+        ClassLoader::$cache_base->createCache();
+        ClassLoader::$cache_base->rebuildCache();
+        ClassLoader::$cache_query = new CacheQuery(ClassLoader::$cache_base);
     }
 
     /**
@@ -433,6 +435,6 @@ echo "Return the existing ClassLoader.\n";
 
 //------------------------------------------------------------------------------
 //register ClassLoader::autoload as autoload-handler
-spl_autoload_register(array(ClassLoader::getInstance(), 'autoload'));
+spl_autoload_register(array(ClassLoader::getInstance(ClassLoader::$custom_conf_class, ClassLoader::$custom_conf_dir, false), 'autoload'));
 
 

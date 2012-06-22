@@ -18,7 +18,7 @@
  *
  */
 interface CacheBaseInterface {
-
+    
     /**
      * Handle creation of base according to mode
      *
@@ -26,7 +26,7 @@ interface CacheBaseInterface {
      * @param array $exclude_dirs_arr
      * @return void
      */
-    public function createCache($cache_roots_arr, $exclude_dirs_arr);
+    public function createCache();
     
     /**
      * Walk through project directories recursively to build ClassCache.
@@ -37,12 +37,30 @@ interface CacheBaseInterface {
     public function buildCache($path, $excluded_dir_arr);
    
     /**
+     * Rebuild the classcache
+     */
+    public function rebuildCache();
+    
+    /**
      * Writes cache file to filesystem in a flatfile.
      *
      * @return boolean result
      */
     public function writeCache();
+    
+    /**
+     * queries a classname. returns a filepath.
+     *
+     * @return string result
+     */
+    public function query($classname);
 
+    /**
+     * returns a list of all known classes.
+     *
+     * @return string result
+     */
+    public function getKnownClasses();
 
 }
 
