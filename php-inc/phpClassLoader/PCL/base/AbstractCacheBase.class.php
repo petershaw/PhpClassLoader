@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__). DIRECTORY_SEPARATOR . 'CacheBase.interface.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'CacheBase.interface.php';
 
 /**
  * Abstract CacheBase<br />
@@ -34,11 +34,9 @@ abstract class AbstractCacheBase implements CacheBaseInterface {
      * @var integer
      */
     public $build_counter = 0;
-
     protected $cache_roots_arr;
-            
     protected $exclude_dirs_arr;
-    
+
     /**
      * Mode (sqlite, flatfile, ...)
      *
@@ -55,9 +53,10 @@ abstract class AbstractCacheBase implements CacheBaseInterface {
         $this->mode = $mode;
     }
 
-    public function getMode(){
+    public function getMode() {
         return $this->mode;
     }
+
     /**
      * Walk through project directories recursively to build ClassCache.
      *

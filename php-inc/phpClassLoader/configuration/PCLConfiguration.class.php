@@ -112,7 +112,7 @@ class PCLConfiguration {
      * @param Object $default optional - Value if Parameter-ey returns null 
      * @return string of value or, array of values
      */
-    public function getSetupParameter($name, $default = null) {
+    public function getParameter($name, $default = null) {
         if (isset($this->xsearch) == false) {
             throw new NilException('There is no configurationobject for this class loaded.');
         }
@@ -154,7 +154,7 @@ class PCLConfiguration {
      * 
      * @return string value
      */
-    public function getSetupParameterKeys() {
+    public function getParameterKeys() {
         $value = $this->xsearch->queryArray('/configuration/parameters/define/@variable');
         return $value;
     }
@@ -164,10 +164,10 @@ class PCLConfiguration {
      * 
      * @return associative array of keys and values
      */
-    public function getSetupParameters() {
+    public function getAllParameters() {
         $value = array();
-        foreach ($this->getSetupParameterKeys() as $key) {
-            $value[$key] = $this->getSetupParameter($key);
+        foreach ($this->getParameterKeys() as $key) {
+            $value[$key] = $this->getParameter($key);
         }
         return $value;
     }

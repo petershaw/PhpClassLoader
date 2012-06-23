@@ -18,7 +18,7 @@
  */
 class uuuxxxgibtsnicht {
 	
-	public $horst = 888;
+	public $string = "a string";
 }
 
 ?>

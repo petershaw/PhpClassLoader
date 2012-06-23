@@ -1,7 +1,7 @@
 <?php
 
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'base'. DIRECTORY_SEPARATOR .'CacheBaseFlatfile.class.php';
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'base'. DIRECTORY_SEPARATOR .'CacheBaseSQLite.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'base' . DIRECTORY_SEPARATOR . 'CacheBaseFlatfile.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'base' . DIRECTORY_SEPARATOR . 'CacheBaseSQLite.class.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'CacheQuery.class.php';
 
 /**
@@ -167,7 +167,6 @@ class ClassLoader {
     private function __construct($custom_conf_class = null, $custom_conf_dir = null) {
         // Set the classloader and the classdir static, in case of a rebuild from 
         // CacheBase.
-echo "Construct ". $custom_conf_class .", ". $custom_conf_dir ."\n";
         ClassLoader::$custom_conf_class = $custom_conf_class;
         ClassLoader::$custom_conf_dir = $custom_conf_dir;
         //import config
@@ -179,12 +178,11 @@ echo "Construct ". $custom_conf_class .", ". $custom_conf_dir ."\n";
         }
 
         //set mode
-        if ((self::$config->getSetupParameter('mode') == 'sqlite') || 
-            (self::$config->getSetupParameter('mode') == 'flatfile')) {
-            self::$mode = self::$config->getSetupParameter('mode');
-echo "Construct with mode: ". self::$mode ."\n";
+        if ((self::$config->getParameter('mode') == 'sqlite') ||
+                (self::$config->getParameter('mode') == 'flatfile')) {
+            self::$mode = self::$config->getParameter('mode');
         } else {
-            throw new Exception('Unknown mode (' . self::$config->getSetupParameter('mode') . ') defined in config.');
+            throw new Exception('Unknown mode (' . self::$config->getParameter('mode') . ') defined in config.');
         }
 
         //set filename for cachefile
@@ -207,14 +205,14 @@ echo "Construct with mode: ". self::$mode ."\n";
                 ClassLoader::$cache_file = 'class_cache.' . str_replace("/", "_", $documentRoot) . '.tmp.db';
                 break;
             default :
-                throw new Exception("Unknown mode '". self::$mode ."' in ". __CLASS__);
+                throw new Exception("Unknown mode '" . self::$mode . "' in " . __CLASS__);
         }
 
         //decide for temp or custom directory used to save the cache file
-        if (self::$config->getSetupParameter('cachefilepath') == 'system_tmp') {
+        if (self::$config->getParameter('cachefilepath') == 'system_tmp') {
             $this->targetdir = File::getTemporaryDirectory();
         } else {
-            $this->targetdir = self::$config->getSetupParameter('cachefilepath');
+            $this->targetdir = self::$config->getParameter('cachefilepath');
         }
         if (empty($this->targetdir) || !is_dir($this->targetdir)) {
             throw new Exception('Temp path to store cache file could not be assigned or is not a directory.');
@@ -224,26 +222,23 @@ echo "Construct with mode: ". self::$mode ."\n";
         chdir($this->targetdir);
 
         // reste cachefile to absolut filename
-        ClassLoader::$cache_file = $this->targetdir .ClassLoader::$cache_file;
+        ClassLoader::$cache_file = $this->targetdir . ClassLoader::$cache_file;
 
         //defines array of dirs to be scanned from config (leave here since it is called by infoscripts)
         $this->defineRootDirs();
 
         //defines exclude list of dirs from config (leave here since it is called by infoscripts)
         $this->defineExcludeList();
-        
+
         //instanciate helpers
-echo "CACHE BASE FOR MODE: ". self::$mode ."\n";
-        if(self::$mode == 'flatfile'){
+        if (self::$mode == 'flatfile') {
             ClassLoader::$cache_base = new CacheBaseFlatfile($this->cache_roots_arr, $this->exclude_dirs_arr);
-        } elseif(self::$mode == 'sqlite'){
+        } elseif (self::$mode == 'sqlite') {
             ClassLoader::$cache_base = new CacheBaseSQLite($this->cache_roots_arr, $this->exclude_dirs_arr);
         } else {
-            throw new Exception("Unknown mode '". self::$mode ."' in ". __CLASS__);
+            throw new Exception("Unknown mode '" . self::$mode . "' in " . __CLASS__);
         }
-echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
         ClassLoader::$cache_query = new CacheQuery(ClassLoader::$cache_base);
-
         ClassLoader::$ClassLoader = $this;
     }
 
@@ -258,20 +253,16 @@ echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
      * @static
      */
     public static function getInstance($custom_conf_class = null, $custom_conf_dir = null, $force_rebuild = false) {
-        echo "Build static ClassLoader get instanc: ". $custom_conf_class .",". $custom_conf_dir ."\n";
         if (is_null(ClassLoader::$ClassLoader) || $force_rebuild == true) {
-            if($force_rebuild == false){
-                if((isset($custom_conf_class) == false && isset(ClassLoader::$custom_conf_class) == true)){
+            if ($force_rebuild == false) {
+                if ((isset($custom_conf_class) == false && isset(ClassLoader::$custom_conf_class) == true)) {
                     $custom_conf_class = ClassLoader::$custom_conf_class;
                 }
-                if((isset($custom_conf_dir) == false && isset(ClassLoader::$custom_conf_dir) == true)){
+                if ((isset($custom_conf_dir) == false && isset(ClassLoader::$custom_conf_dir) == true)) {
                     $custom_conf_dir = ClassLoader::$custom_conf_dir;
                 }
             }
-            echo "Build static ClassLoader with config: ". $custom_conf_class .",". $custom_conf_dir ."\n";
             ClassLoader::$ClassLoader = new ClassLoader($custom_conf_class, $custom_conf_dir);
-        } else {
-            echo "Return the existing ClassLoader.\n";
         }
 
         //create cache
@@ -281,7 +272,6 @@ echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
             ClassLoader::$cache_base->rebuildCache();
             ClassLoader::$cache_query = new CacheQuery(ClassLoader::$cache_base);
         }
-        
         return ClassLoader::$ClassLoader;
     }
 
@@ -293,10 +283,9 @@ echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
      */
     public function autoload($classname) {
         //include file
-        echo "AUTOLOAD: ". ClassLoader::$cache_base->getMode() .", ". ClassLoader::$mode ." - " ."\n";
         include_once (ClassLoader::$cache_query->getIncludepath($classname));
-        if(!class_exists($classname)){
-            throw Excepton("Can not include classfile for class ". $classname);
+        if (!class_exists($classname)) {
+            throw Excepton("Can not include classfile for class " . $classname);
         }
     }
 
@@ -307,44 +296,45 @@ echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
     public function defineRootDirs() {
         //init
         $this->cache_roots_arr = array();
-        if (self::$config->getSetupParameter('rootdirmode') == 'relative') {
+        if (self::$config->getParameter('rootdirmode') == 'relative') {
             //set dirs relative to $targetdir
             /* if PhpClassLoader_RootDirectory is not set, get a directory above 
              * the filelocation. PhpClassLoader_RootDirectory will set by Phar 
              * handler.
              */
             $mydirarr = explode(DIRECTORY_SEPARATOR, dirname(__FILE__));
-            array_pop($mydirarr); array_pop($mydirarr);
+            array_pop($mydirarr);
+            array_pop($mydirarr);
             $mydir = implode(DIRECTORY_SEPARATOR, $mydirarr);
-            if(defined("PhpClassLoader_RootDirectory")){
+            if (defined("PhpClassLoader_RootDirectory")) {
                 // than use the defined one.
                 $mydir = PhpClassLoader_RootDirectory;
             }
             // fix path 
-            $seperator = "\\".DIRECTORY_SEPARATOR;
-            if(preg_match("/$seperator$/", $mydir) == false){
+            $seperator = "\\" . DIRECTORY_SEPARATOR;
+            if (preg_match("/$seperator$/", $mydir) == false) {
                 $mydir = $mydir . DIRECTORY_SEPARATOR;
             }
 
             // list or single value
-            if (is_array(self::$config->getSetupParameter('include'))) {
-                foreach (self::$config->getSetupParameter('include') as $d) {
+            if (is_array(self::$config->getParameter('include'))) {
+                foreach (self::$config->getParameter('include') as $d) {
                     $this->cache_roots_arr [] = realpath($mydir . $d);
                 }
             } else {
-                $this->cache_roots_arr [] = realpath($mydir . self::$config->getSetupParameter('include'));
+                $this->cache_roots_arr [] = realpath($mydir . self::$config->getParameter('include'));
             }
-        } elseif (self::$config->getSetupParameter('rootdirmode') == 'absolute') {
+        } elseif (self::$config->getParameter('rootdirmode') == 'absolute') {
             //list or single value
-            if (is_array(self::$config->getSetupParameter('include'))) {
-                foreach (self::$config->getSetupParameter('include') as $d) {
+            if (is_array(self::$config->getParameter('include'))) {
+                foreach (self::$config->getParameter('include') as $d) {
                     $this->cache_roots_arr [] = $d;
                 }
             } else {
-                $this->cache_roots_arr [] = realpath(self::$config->getSetupParameter('include'));
+                $this->cache_roots_arr [] = realpath(self::$config->getParameter('include'));
             }
         } else {
-            throw new Exception('Unknown rootdirmode (' . self::$config->getSetupParameter('rootdirmode') . ') set in config.');
+            throw new Exception('Unknown rootdirmode (' . self::$config->getParameter('rootdirmode') . ') set in config.');
         }
         $returnArray = array();
         foreach ($this->cache_roots_arr as $dir) {
@@ -363,7 +353,7 @@ echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
         //init
         $this->exclude_dirs_arr = array();
 
-        $exList = self::$config->getSetupParameter('exclude');
+        $exList = self::$config->getParameter('exclude');
         if (isset($exList)) {
             //list or single value
             if (is_array($exList)) {
@@ -371,7 +361,7 @@ echo "MODE IN CACHE_BASE: ". ClassLoader::$cache_base->getMode() ."\n";
                     $this->exclude_dirs_arr [] = $e;
                 }
             } else {
-                $this->exclude_dirs_arr [] = self::$config->getSetupParameter('exclude');
+                $this->exclude_dirs_arr [] = self::$config->getParameter('exclude');
             }
         }
         return $this->exclude_dirs_arr;

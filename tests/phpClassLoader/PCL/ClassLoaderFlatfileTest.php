@@ -1,7 +1,7 @@
 <?php
 
 $equivalentSrcDir = str_replace("tests", "php-inc", dirname(__FILE__));
-require_once  $equivalentSrcDir. DIRECTORY_SEPARATOR .'ClassLoader.class.php';
+require_once $equivalentSrcDir . DIRECTORY_SEPARATOR . 'ClassLoader.class.php';
 
 /**
  * ClassLoaderFlatfileTest
@@ -32,14 +32,12 @@ class ClassLoaderFlatfileTest extends PHPUnit_Framework_TestCase implements PHPU
      * Called by PHPUnit as kinda consturctor for all methods!
      */
     protected function setUp() {
-echo "SetUp: classloadertest, in ". dirname(__FILE__) ."\n";
+        echo "SetUp: classloadertest for flatfiles in " . dirname(__FILE__) . "\n";
         $this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__), true);
-        if (file_exists(ClassLoader::getCacheFile())) {
-            unlink(ClassLoader::getCacheFile());
-        }
-        //$this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__));
+
         ClassLoader::$mode = 'flatfile';
         $file = $this->classcache->getCacheFile();
+        echo "created cache file: " . $file . "\n";
     }
 
     /**
@@ -47,6 +45,9 @@ echo "SetUp: classloadertest, in ". dirname(__FILE__) ."\n";
      */
     protected function tearDown() {
         unset($this->classcache);
+        if (file_exists(ClassLoader::getCacheFile())) {
+            unlink(ClassLoader::getCacheFile());
+        }
     }
 
     /**
@@ -55,6 +56,8 @@ echo "SetUp: classloadertest, in ". dirname(__FILE__) ."\n";
     public function testLoadOnFlatfile() {
         echo "| test testLoadOnFlatfile \n";
         $testObj = new uuuxxxgibtsnicht();
+        $this->assertEquals("a string", $testObj->string, "Could not get public property from testcalss-");
+
         $result = $this->classcache->getAllKnownClasses();
         $this->assertTrue(array_key_exists("uuuxxxgibtsnicht", $result), 'Testclass not found.');
         unset($testObj);

@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'../file/File.class.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../file/File.class.php';
 
 /**
  * SimpleLogger<br />
@@ -29,35 +29,36 @@ class SimpleLogger {
     function __construct(File $logfile = null) {
         if ($logfile == null) {
             $logfile = new File(
-                            File::getTemporaryDirectory().
-                            DIRECTORY_SEPARATOR.
-                            date("Y-m-d").
+                            File::getTemporaryDirectory() .
+                            DIRECTORY_SEPARATOR .
+                            date("Y-m-d") .
                             '-phpClassLoader.log'
             );
         }
-        if( is_a($logfile, 'File') == false ){
+        if (is_a($logfile, 'File') == false) {
             return null;
         }
-        if( $logfile->isExists() == false ){
+        if ($logfile->isExists() == false) {
             $logfile->create();
         }
-        
+
         $this->logfile = $logfile;
     }
 
     public function getLogFile() {
         return $this->logfile;
     }
-    
-    public function log($level, $message){
-        $logMessage = date("Y-m-d h:m") .": ". $level ." | ". $message ."\n";
+
+    public function log($level, $message) {
+        $logMessage = date("Y-m-d h:m") . ": " . $level . " | " . $message . "\n";
         $this->logfile->appendString($logMessage);
     }
 
-    public function getLogContent(){
+    public function getLogContent() {
         $this->logfile->disableReadCache();
         return $this->logfile->getContent();
     }
+
 }
 
 ?>

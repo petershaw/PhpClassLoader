@@ -26,8 +26,8 @@ class CacheBaseSQLite extends AbstractCacheBase {
      * @var ressource
      */
     private static $sqlite_connect;
-    
-     public function __construct($cache_roots_arr, $exclude_dirs_arr) {
+
+    public function __construct($cache_roots_arr, $exclude_dirs_arr) {
         parent::__construct('sqlite');
         $this->cache_roots_arr = $cache_roots_arr;
         $this->exclude_dirs_arr = $exclude_dirs_arr;
@@ -35,8 +35,7 @@ class CacheBaseSQLite extends AbstractCacheBase {
             $this->DBConnect(ClassLoader::getCacheFile());
         }
     }
-    
-    
+
     /**
      * Creates the cachebase
      *
@@ -57,11 +56,13 @@ class CacheBaseSQLite extends AbstractCacheBase {
         }
         $this->writeCache();
     }
-    
+
     public function rebuildCache() {
-        ;
+        unlink(ClassLoader::getCacheFile());
+        $this->createCache();
+        $this->writeCache();
     }
-    
+
     public function writeCache() {
         if (!isset(CacheBaseSQLite::$sqlite_connect)) {
             $this->DBConnect(ClassLoader::getCacheFile());
@@ -77,36 +78,35 @@ class CacheBaseSQLite extends AbstractCacheBase {
         }
         return false;
     }
-    
-        /**
+
+    /**
      * Connect to or create no existing SQLite-DB file
      * 
      * @param string $dbfile filename
      * @return db handle of connection
      */
     private function DBConnect($dbfile) {
-            $sqliteerror = null;
-            // CacheBase::$sqlite_connect = sqlite_open ( ClassLoader::getCacheFile (), 0777, $sqliteerror ) ;
-            //if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3) {
-            CacheBaseSQLite::$sqlite_connect = new PDO('sqlite:' . ClassLoader::getCacheFile());
-            //} else {
-            //    CacheBase::$sqlite_connect = new SQLite3(ClassLoader::getCacheFile());
-            //}
-            if (!empty($sqliteerror) || CacheBaseSQLite::$sqlite_connect == null) {
-                throw new Exception('DB-file could not be opened: ' . $dbfile . '. SQLite-error:' . $sqliteerror);
-            }
-    }
-    
-    public function query($classname){
-        $res_arr = CacheBaseSQLite::$sqlite_connect->query("SELECT path FROM classcache WHERE classname='$classname'");
-echo "RESULT: \n";
-        print_r($res_arr);
-        if(is_array($res_arr) && count($res_arr) > 0){
-            return array_shift($res_arr);
+        $sqliteerror = null;
+        // CacheBase::$sqlite_connect = sqlite_open ( ClassLoader::getCacheFile (), 0777, $sqliteerror ) ;
+        //if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3) {
+        CacheBaseSQLite::$sqlite_connect = new PDO('sqlite:' . ClassLoader::getCacheFile());
+        //} else {
+        //    CacheBase::$sqlite_connect = new SQLite3(ClassLoader::getCacheFile());
+        //}
+        if (!empty($sqliteerror) || CacheBaseSQLite::$sqlite_connect == null) {
+            throw new Exception('DB-file could not be opened: ' . $dbfile . '. SQLite-error:' . $sqliteerror);
         }
     }
 
-    public function getKnownClasses(){
+    public function query($classname) {
+
+        $result_arr = CacheBaseSQLite::$sqlite_connect->query("SELECT path FROM classcache WHERE classname='" . $classname . "'");
+        foreach ($result_arr as $r) {
+            return $r['path'];
+        }
+    }
+
+    public function getKnownClasses() {
         $known_classes = array();
         $result_arr = CacheBaseSQLite::$sqlite_connect->query("SELECT * FROM classcache");
         foreach ($result_arr as $r) {
@@ -114,6 +114,7 @@ echo "RESULT: \n";
         }
         return $known_classes;
     }
+
 }
 
 ?>

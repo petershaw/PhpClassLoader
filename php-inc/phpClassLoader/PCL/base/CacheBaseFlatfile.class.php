@@ -52,9 +52,11 @@ class CacheBaseFlatfile extends AbstractCacheBase {
     }
 
     public function rebuildCache() {
-        ;
+        unlink(ClassLoader::getCacheFile());
+        $this->createCache();
+        $this->writeCache();
     }
-    
+
     public function writeCache() {
         $printed_array = var_export($this->known_classes, true);
         $file_content = <<<CONT
@@ -67,15 +69,15 @@ CONT;
         }
         return false;
     }
-    
-    public function query($classname){
-        
-        if( isset($this->known_classes) && array_key_exists($classname, $this->known_classes) ){
+
+    public function query($classname) {
+
+        if (isset($this->known_classes) && array_key_exists($classname, $this->known_classes)) {
             return $this->known_classes[$classname];
         }
     }
-    
-    public function getKnownClasses(){
+
+    public function getKnownClasses() {
         return $this->known_classes;
     }
 

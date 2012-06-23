@@ -1,5 +1,8 @@
 <?php
 
+$equivalentSrcDir = str_replace("tests", "php-inc", dirname(__FILE__));
+require_once $equivalentSrcDir . DIRECTORY_SEPARATOR . 'ClassLoader.class.php';
+
 /**
  * ClassLoaderSQLiteTest
  * ============================
@@ -31,17 +34,21 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      */
     protected function setUp() {
         echo "---- setup sqllite test\n";
-        
-        $this->classcache =  ClassLoader::getInstance('classloadersqlitetest', dirname(__FILE__), true);
+        $this->classcache = ClassLoader::getInstance('classloadersqlitetest', dirname(__FILE__), true);
+
         ClassLoader::$mode = 'sqllite';
-        $this->classcache->clear();
+        $file = $this->classcache->getCacheFile();
+        echo "created cache file: " . $file . "\n";
     }
 
     /**
      * Called by PHPUnit as kinda desturctor for all methods!
      */
     protected function tearDown() {
-        //unset($this->classcache);
+        unset($this->classcache);
+        if (file_exists(ClassLoader::getCacheFile())) {
+            unlink(ClassLoader::getCacheFile());
+        }
     }
 
     /**
@@ -49,21 +56,14 @@ class ClassLoaderSQLiteTest extends PHPUnit_Framework_TestCase implements PHPUni
      */
     public function testSQLLoad() {
         echo "| test testSQLLoad\n";
-        $this->classcache =  ClassLoader::getInstance('classloadersqlitetest', dirname(__FILE__), true);
-        echo "&&&&& ". $this->classcache->getCacheFile()."\n";
-        echo "&&&&& ". ClassLoader::$mode ."\n";
-        echo "&&&&& ". ClassLoader::$custom_conf_class ."\n";
-        echo "&&&&& ". ClassLoader::$custom_conf_dir ."\n";
-        echo "&&&&& ". ClassLoader::$cache_file ."\n";
-        
+
         $testObj = new yyyxxxgibtsnicht();
         $this->assertEquals("for testing", $testObj->reason, "Could not get public property from testcalss-");
-        
+
         $result = $this->classcache->getAllKnownClasses();
         $this->assertTrue(array_key_exists("yyyxxxgibtsnicht", $result), 'Testclass not found.');
+
         unset($testObj);
-        
-        echo "********************************************** \n";
     }
 
 }

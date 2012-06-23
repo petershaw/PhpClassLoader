@@ -63,7 +63,7 @@ class ClassLoaderTest extends PHPUnit_Framework_TestCase implements PHPUnit_Fram
         $this->classcache = ClassLoader::getInstance("classloadertest", dirname(__FILE__), true);
         ClassLoader::$mode = 'flatfile';
         $file = $this->classcache->getCacheFile();
-        echo "USING: " . ClassLoader::getCacheFile() ."\n\n";
+        echo "USING: " . ClassLoader::getCacheFile() . "\n\n";
 
         $testObj = new uuuxxxgibtsnicht();
         $result = $this->classcache->getAllKnownClasses();

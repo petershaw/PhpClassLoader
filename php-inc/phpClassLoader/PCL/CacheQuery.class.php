@@ -43,7 +43,6 @@ class CacheQuery {
      * @var string
      */
     public $searched_classname;
-
     private $logger;
 
     /**
@@ -65,10 +64,8 @@ class CacheQuery {
      */
     public function getIncludepath($classname) {
         $classpath = null;
-echo "Q: [". $classname ."] clmode=". ClassLoader::$mode .", Cache_Base Mode: ". $this->cacheBase->getMode() ."\n";
-        
         $classpath = $this->cacheBase->query($classname);
-        
+
         //try one rebuild
         if (empty($classpath) && $this->cacheBase->build_counter == 0) {
             //save classname in singleton, it would otherwise be lost from this point
@@ -76,16 +73,15 @@ echo "Q: [". $classname ."] clmode=". ClassLoader::$mode .", Cache_Base Mode: ".
             $this->logger->log(SimpleLogger::INFO, 'Rebuild of classcache triggered caused by missing class "' . $this->searched_classname . '".');
             //trigger real error if rebuilding did not help
             if ($this->cacheBase->build_counter > 0) {
-                $this->logger->log(SimpleLogger::ERROR, 'Despite rebuild of classcache ('. $this->mode .') the required class "' . $this->searched_classname . '" could not be found.');
+                $this->logger->log(SimpleLogger::ERROR, 'Despite rebuild of classcache (' . $this->mode . ') the required class "' . $this->searched_classname . '" could not be found.');
             }
             //recal build-process once
             ClassLoader::$ClassLoader = ClassLoader::getInstance(ClassLoader::$custom_conf_class, ClassLoader::$custom_conf_dir, true);
             $this->cacheBase->build_counter++;
             //read result from array in memory from rebuild
             /* if (isset(ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname])) {
-                $classpath = ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname];
-            } */
-echo "Second try after rebuild\n";
+              $classpath = ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname];
+              } */
             return $this->getIncludepath($classname);
         }
         //handle case when no path can be returned

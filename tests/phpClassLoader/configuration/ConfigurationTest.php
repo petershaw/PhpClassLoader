@@ -74,14 +74,14 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase {
      */
     public function testGetSetupParameter() {
         echo "| test testGetSetupParameter\n";
-        $this->assertEquals($this->Configuration->getSetupParameter('testdefine'), "foo", "Variable testdefine is not foo.");
-        $this->assertEquals($this->Configuration->getSetupParameter('secondtestdefine'), "bar", "Variable secondtestdefine is not foo.");
-        $this->assertEquals($this->Configuration->getSetupParameter('thirdtestdefine'), "foo bar test", "Variable thirdtestdefine is not foo bar test.");
+        $this->assertEquals($this->Configuration->getParameter('testdefine'), "foo", "Variable testdefine is not foo.");
+        $this->assertEquals($this->Configuration->getParameter('secondtestdefine'), "bar", "Variable secondtestdefine is not foo.");
+        $this->assertEquals($this->Configuration->getParameter('thirdtestdefine'), "foo bar test", "Variable thirdtestdefine is not foo bar test.");
     }
 
     public function testGetNullSetupParameter() {
         echo "| test testGetNullSetupParameter\n";
-        $this->assertNull($this->Configuration->getSetupParameter('null'), "Variable null is not a define.");
+        $this->assertNull($this->Configuration->getParameter('null'), "Variable null is not a define.");
     }
 
     /**
@@ -89,7 +89,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase {
      */
     public function testGetSetupParameterKeys() {
         echo "| test testGetSetupParameterKeys\n";
-        $result = $this->Configuration->getSetupParameterKeys();
+        $result = $this->Configuration->getParameterKeys();
         $this->assertTrue(is_array($result), "a array is expected.");
         $this->assertTrue(in_array("testdefine", $result), "testdefine is not found.");
     }
@@ -99,7 +99,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase {
      */
     public function testGetSetupParameters() {
         echo "| test testGetSetupParameters\n";
-        $result = $this->Configuration->getSetupParameters();
+        $result = $this->Configuration->getAllParameters();
         $this->assertTrue(is_array($result), "a array is expected.");
         $this->assertEquals($result['testdefine'], "foo", "wrong value.");
         $this->assertEquals($result['thirdtestdefine'], "foo bar test", "wrong value.");
@@ -110,7 +110,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase {
      */
     public function testGetArrayParameters() {
         echo "| test testGetArrayParameters";
-        $result = $this->Configuration->getSetupParameter('anarrayentry');
+        $result = $this->Configuration->getParameter('anarrayentry');
         $this->assertTrue(is_array($result), "a array is expected.");
 
         $this->assertContains(1, $result, "The Setuppparamenter did not return all integers from a array.");
