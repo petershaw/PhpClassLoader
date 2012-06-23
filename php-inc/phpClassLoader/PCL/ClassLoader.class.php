@@ -269,7 +269,7 @@ class ClassLoader {
         if (!file_exists(ClassLoader::getCacheFile()) || $force_rebuild == true) {
             //create a new cache base according to mode
             ClassLoader::$cache_base->createCache();
-            ClassLoader::$cache_base->rebuildCache();
+            //ClassLoader::$cache_base->rebuildCache();
             ClassLoader::$cache_query = new CacheQuery(ClassLoader::$cache_base);
         }
         return ClassLoader::$ClassLoader;

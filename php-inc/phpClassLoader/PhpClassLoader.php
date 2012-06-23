@@ -28,6 +28,13 @@
  *
  */
 
+// get the directory where the classloader is located.
+if(defined("PhpClassLoader_RootDirectory") === false ){
+    $pcl_pathArray = explode(DIRECTORY_SEPARATOR, Phar::running(false));
+    array_pop($pcl_pathArray);
+    define("PhpClassLoader_RootDirectory", implode(DIRECTORY_SEPARATOR, $pcl_pathArray));    
+}
+
 // include internal sources
 require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'PCL'. DIRECTORY_SEPARATOR .'ClassLoader.class.php';
 require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'configuration'. DIRECTORY_SEPARATOR .'PCLConfiguration.class.php';
@@ -38,12 +45,5 @@ require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'file'. DIRECTORY_SEPARATOR
 require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'file'. DIRECTORY_SEPARATOR .'GuessMime.class.php';
 require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'file'. DIRECTORY_SEPARATOR .'IncFile.class.php';
 require_once dirname(__FILE__). DIRECTORY_SEPARATOR .'xml'. DIRECTORY_SEPARATOR .'xmlSearch'. DIRECTORY_SEPARATOR .'XmlSearch.class.php';
-
-// get the directory where the classloader is located.
-if(defined("PhpClassLoader_RootDirectory") === false ){
-    $pcl_pathArray = explode(DIRECTORY_SEPARATOR, Phar::running(false));
-    array_pop($pcl_pathArray);
-    define("PhpClassLoader_RootDirectory", implode(DIRECTORY_SEPARATOR, $pcl_pathArray));    
-}
 
 ?>

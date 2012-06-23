@@ -52,7 +52,9 @@ class CacheBaseFlatfile extends AbstractCacheBase {
     }
 
     public function rebuildCache() {
-        unlink(ClassLoader::getCacheFile());
+        if(file_exists(ClassLoader::getCacheFile())){
+            //unlink(ClassLoader::getCacheFile());
+        }
         $this->createCache();
         $this->writeCache();
     }
@@ -71,7 +73,6 @@ CONT;
     }
 
     public function query($classname) {
-
         if (isset($this->known_classes) && array_key_exists($classname, $this->known_classes)) {
             return $this->known_classes[$classname];
         }

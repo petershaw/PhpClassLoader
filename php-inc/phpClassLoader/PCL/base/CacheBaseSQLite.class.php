@@ -58,7 +58,9 @@ class CacheBaseSQLite extends AbstractCacheBase {
     }
 
     public function rebuildCache() {
-        unlink(ClassLoader::getCacheFile());
+        if(file_exists(ClassLoader::getCacheFile())){
+            //unlink(ClassLoader::getCacheFile());
+        }
         $this->createCache();
         $this->writeCache();
     }

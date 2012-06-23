@@ -42,7 +42,7 @@ class CacheQuery {
      *
      * @var string
      */
-    public $searched_classname;
+    public static $searched_classname;
     private $logger;
 
     /**
@@ -69,26 +69,25 @@ class CacheQuery {
         //try one rebuild
         if (empty($classpath) && $this->cacheBase->build_counter == 0) {
             //save classname in singleton, it would otherwise be lost from this point
-            $this->searched_classname = $classname;
-            $this->logger->log(SimpleLogger::INFO, 'Rebuild of classcache triggered caused by missing class "' . $this->searched_classname . '".');
+            CacheQuery::$searched_classname = $classname;
+            $this->logger->log(SimpleLogger::INFO, 'Rebuild of classcache triggered caused by missing class "' . CacheQuery::$searched_classname . '".');
             //trigger real error if rebuilding did not help
-            if ($this->cacheBase->build_counter > 0) {
-                $this->logger->log(SimpleLogger::ERROR, 'Despite rebuild of classcache (' . $this->mode . ') the required class "' . $this->searched_classname . '" could not be found.');
-            }
             //recal build-process once
-            ClassLoader::$ClassLoader = ClassLoader::getInstance(ClassLoader::$custom_conf_class, ClassLoader::$custom_conf_dir, true);
+            //ClassLoader::$ClassLoader = ClassLoader::getInstance(ClassLoader::$custom_conf_class, ClassLoader::$custom_conf_dir, true);
+            $this->cacheBase->rebuildCache();
             $this->cacheBase->build_counter++;
             //read result from array in memory from rebuild
             /* if (isset(ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname])) {
               $classpath = ClassLoader::$ClassLoader->cache_base->known_classes[$this->searched_classname];
               } */
             return $this->getIncludepath($classname);
+        } else if (empty($classpath) && $this->cacheBase->build_counter > 0) {
+            $this->logger->log(SimpleLogger::ERROR, 'Despite rebuild of classcache the required class "' . CacheQuery::$searched_classname . '" could not be found.');
         }
         //handle case when no path can be returned
         if (!isset($classpath)) {
             eval("class $classname{};"); //hack to make autoload throw a regular exception
             throw new Exception('Could not find required class ("' . $classname . '") in ClassLoader.' . "\n" . '[1] If new classes have been added to the system, ClassLoader must be rebuilt! Please delete the cache file ' . ClassLoader::getCacheFile() . ' to rebuild the cache and reload.' . "\n" . '[2] The required class lies in an excluded directory. Check ClassLoader::defineExcludeList() and rebuild cache on any changes.' . "\n" . 'Called from:\n');
-            die('Execution stopped.');
         }
         return $classpath;
     }
