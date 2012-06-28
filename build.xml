@@ -164,7 +164,7 @@
         </tar>
         
         <echo msg="Creating phar archive..." />
-        <pharpackage destfile="${project.targetdir}/${project.name}.phar.gz" basedir="${project.builddir}/php-inc/" compression="gzip" webstub="$${project.builddir}/php-inc/phpClassLoader/PhpClassLoader.php" clistub="${project.builddir}/php-inc/phpClassLoader/PhpClassLoader.php">
+        <pharpackage destfile="${project.targetdir}/${project.name}.phar.gz" basedir="${project.builddir}/php-inc/" compression="gzip" webstub="${project.builddir}/php-inc/phpClassLoader/PhpClassLoader.php" clistub="${project.builddir}/php-inc/phpClassLoader/PhpClassLoader.php">
             <fileset dir="${project.builddir}">
                 <include name="**/**" />
             </fileset>
